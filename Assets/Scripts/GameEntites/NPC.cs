@@ -4,6 +4,5 @@ namespace rqgames.GameEntities
 { 
     public class NPC : MonoBehaviour
     {
-
     }
 }
