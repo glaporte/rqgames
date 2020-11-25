@@ -4,9 +4,15 @@ using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
+using rqgames.GameEntities;
 
-namespace rqgames.Loading
+namespace rqgames.Init
 {
+    public static class GlobalVariables
+    {
+        public static gameconfig.GameConfig GameConfig;
+    }
+
     public static class LoadedGameData
     {
         public static GameObject Player;
@@ -19,10 +25,8 @@ namespace rqgames.Loading
     public static class PooledGameData
     {
         public static GameObject Player;
-        public static List<GameObject> NPC1s;
-        public static List<GameObject> NPC2s;
-        public static List<GameObject> NPC3s;
-        public static List<GameObject> Weapons;
+        public static List<Stack<GameObject>> NPCs;
+        public static Stack<GameObject> Weapons;
     }
 
     public class LoadingScene : MonoBehaviour
@@ -36,14 +40,17 @@ namespace rqgames.Loading
         private void Awake()
         {
             DontDestroyOnLoad(this.gameObject);
+            GlobalVariables.GameConfig = _gameConfig;
         }
 
         private void Start()
         {
-            PooledGameData.NPC1s = new List<GameObject>();
-            PooledGameData.NPC2s = new List<GameObject>();
-            PooledGameData.NPC3s = new List<GameObject>();
-            PooledGameData.Weapons = new List<GameObject>();
+            PooledGameData.NPCs = new List<Stack<GameObject>>();
+            PooledGameData.NPCs.Add(new Stack<GameObject>());
+            PooledGameData.NPCs.Add(new Stack<GameObject>());
+            PooledGameData.NPCs.Add(new Stack<GameObject>());
+
+            PooledGameData.Weapons = new Stack<GameObject>();
             Addressables.LoadAssetsAsync<GameObject>(_assetLabelReference, LoadCallback).Completed += LoadingGameData_Completed;
         }
 
@@ -54,22 +61,22 @@ namespace rqgames.Loading
             else if (obj.GetComponent<rqgames.GameEntities.NPC1>() != null)
             {
                 LoadedGameData.NPC1 = obj;
-                StartCoroutine(HandleNPCs(obj, _gameConfig.LOAD_AND_MAX_NPC1, PooledGameData.NPC1s));
+                StartCoroutine(HandlePooled(obj, _gameConfig.CountNpc1, PooledGameData.NPCs[0]));
             }
             else if (obj.GetComponent<rqgames.GameEntities.NPC2>() != null)
             {
                 LoadedGameData.NPC2 = obj;
-                StartCoroutine(HandleNPCs(obj, _gameConfig.LOAD_AND_MAX_NPC2, PooledGameData.NPC2s));
+                StartCoroutine(HandlePooled(obj, _gameConfig.CountNpc2, PooledGameData.NPCs[1]));
             }
             else if (obj.GetComponent<rqgames.GameEntities.NPC3>() != null)
             {
                 LoadedGameData.NPC3 = obj;
-                StartCoroutine(HandleNPCs(obj, _gameConfig.LOAD_AND_MAX_NPC3, PooledGameData.NPC3s));
+                StartCoroutine(HandlePooled(obj, _gameConfig.CountNpc3, PooledGameData.NPCs[2]));
             }
             else if (obj.GetComponent<rqgames.GameEntities.Weapon>() != null)
             {
                 LoadedGameData.Weapon = obj;
-                StartCoroutine(HandleNPCs(obj, _gameConfig.LOAD_AND_MAX_WEAPON, PooledGameData.Weapons));
+                StartCoroutine(HandlePooled(obj, _gameConfig.CountMaxWeapon, PooledGameData.Weapons));
             }
             else
                 Debug.Log(obj.name + " not handled for loading.");
@@ -86,13 +93,14 @@ namespace rqgames.Loading
             yield break;
         }
 
-        private IEnumerator HandleNPCs(GameObject npc, int max, List<GameObject> container)
+        private IEnumerator HandlePooled(GameObject npc, int max, Stack<GameObject> container)
         {
             for (int i = 0; i < max; i++)
             {
                 GameObject go = Instantiate(npc);
+                go.GetComponent<IPooledGameEntities>().Container = container;
                 DontDestroyOnLoad(go);
-                container.Add(go);
+                container.Push(go);
                 go.SetActive(false);
                 yield return null;
             }

@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd0ae9447200e4705844d3362a630933, type: 3}
   m_Name: GameConfig
   m_EditorClassIdentifier: 
-  LOAD_AND_MAX_NPC1: 10
-  LOAD_AND_MAX_NPC2: 10
-  LOAD_AND_MAX_NPC3: 10
-  LOAD_AND_MAX_MISSILE: 50
+  Npc1Ratio: 0.348
+  Npc2Ratio: 0.33
+  Npc3Ratio: 0.52
+  NpcRows: 4
+  NpcCols: 8

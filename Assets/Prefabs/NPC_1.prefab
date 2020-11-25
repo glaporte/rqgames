@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 4652017441121767915}
   - component: {fileID: 7452259460831831329}
   - component: {fileID: -7373284034893181633}
+  - component: {fileID: 1117154898105184868}
   m_Layer: 0
   m_Name: NPC_1
   m_TagString: Untagged
@@ -26,7 +27,7 @@ Transform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8965332114434376948}
-  m_LocalRotation: {x: 0.00000008146034, y: -1.1102233e-16, z: 1.1102236e-16, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
@@ -92,3 +93,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 43be99e9b687d4f5ca2a3683965b7d0d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!65 &1117154898105184868
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8965332114434376948}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 1
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Size: {x: 2.034354, y: 2.0343542, z: 1.2971544}
+  m_Center: {x: 8.27403e-24, y: -0.00000017881393, z: 0.3125839}

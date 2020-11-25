@@ -2,9 +2,9 @@
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-namespace rqgames.MainMenuScene
+namespace rqgames.MainMenu
 { 
-    public class MainMenu : MonoBehaviour
+    public class MainMenuScene : MonoBehaviour
     {
         [SerializeField]
         private Button _startButton;

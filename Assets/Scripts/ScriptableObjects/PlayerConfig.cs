@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace rqgames.MainMenuScene
+namespace rqgames.MainMenu
 {
     [CreateAssetMenu]
     public class PlayerConfig : ScriptableObject
