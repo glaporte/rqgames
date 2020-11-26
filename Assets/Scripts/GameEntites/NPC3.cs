@@ -16,13 +16,23 @@ namespace rqgames.GameEntities.NPCs
 
         protected void Update()
         {
-            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x,
+            /*transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x,
                 0,
                 (transform.rotation.eulerAngles.z + Time.deltaTime * 10 * _sign));
             if (transform.rotation.eulerAngles.z > MinMaxZAngle.y && _sign > 0)
                 _sign *= -1;
             else if (transform.rotation.eulerAngles.z < MinMaxZAngle.x && _sign < 0)
                 _sign *= -1;
+            */
+        }
+
+
+        override public void Rotate(float intensity)
+        {
+            if (intensity == 0)
+                transform.rotation = InitialRotation;
+            else
+                transform.localRotation = InitialRotation * Quaternion.Euler(0, 0, -intensity * 30);
         }
     }
 }

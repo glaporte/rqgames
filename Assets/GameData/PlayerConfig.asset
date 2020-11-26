@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: PlayerConfig
   m_EditorClassIdentifier: 
   LifeCount: 3
-  LateralSpeed: 2
+  LateralSpeed: 8
   InvulnerabilityTime: 2
-  MoveTime: 0.05
+  MoveTime: 0.268
   AttackTime: 0.2
   ProjectileSpeed: 3

@@ -13,7 +13,6 @@ namespace rqgames.InputManagement
 
     public class SwipeManager : MonoBehaviour
     {
-
         public float swipeThreshold = 25f;
         public float timeThreshold = 0.3f;
 
@@ -21,12 +20,13 @@ namespace rqgames.InputManagement
         public readonly UnityEvent OnSwipeRight = new UnityEvent();
         public readonly UnityEvent OnSwipeUp = new UnityEvent();
         public readonly UnityEvent OnSwipeDown = new UnityEvent();
-        public readonly UnityEvent<Vector2> OnSwipeRelease = new ScreenPositionEvent();
+        public readonly UnityEvent<Vector2> OnStationaryPressDownUp = new ScreenPositionEvent();
 
         private Vector2 fingerDown;
         private DateTime fingerDownTime;
         private Vector2 fingerUp;
         private DateTime fingerUpTime;
+        private bool _initStationaryFingerDown;
 
         private void Update()
         {
@@ -35,13 +35,15 @@ namespace rqgames.InputManagement
                 this.fingerDown = Input.mousePosition;
                 this.fingerUp = Input.mousePosition;
                 this.fingerDownTime = DateTime.Now;
+                _initStationaryFingerDown = true;
             }
             if (Input.GetMouseButtonUp(0))
             {
                 this.fingerDown = Input.mousePosition;
                 this.fingerUpTime = DateTime.Now;
                 this.CheckSwipe();
-                OnSwipeRelease.Invoke(Input.mousePosition);
+                if (_initStationaryFingerDown)
+                    OnStationaryPressDownUp.Invoke(Input.mousePosition);
             }
 
 
@@ -52,13 +54,15 @@ namespace rqgames.InputManagement
                     this.fingerDown = touch.position;
                     this.fingerUp = touch.position;
                     this.fingerDownTime = DateTime.Now;
+                    _initStationaryFingerDown = true;
                 }
                 if (touch.phase == TouchPhase.Ended)
                 {
                     this.fingerDown = touch.position;
                     this.fingerUpTime = DateTime.Now;
                     this.CheckSwipe();
-                    OnSwipeRelease.Invoke(touch.position);
+                    if (_initStationaryFingerDown)
+                        OnStationaryPressDownUp.Invoke(touch.position);
                 }
             }
 
@@ -80,10 +84,12 @@ namespace rqgames.InputManagement
                 if (deltaX > 0)
                 {
                     this.OnSwipeRight.Invoke();
+                    _initStationaryFingerDown = false;
                 }
                 else if (deltaX < 0)
                 {
                     this.OnSwipeLeft.Invoke();
+                    _initStationaryFingerDown = false;
                 }
             }
 
@@ -93,10 +99,12 @@ namespace rqgames.InputManagement
                 if (deltaY > 0)
                 {
                     this.OnSwipeUp.Invoke();
+                    _initStationaryFingerDown = false;
                 }
                 else if (deltaY < 0)
                 {
                     this.OnSwipeDown.Invoke();
+                    _initStationaryFingerDown = false;
                 }
             }
 

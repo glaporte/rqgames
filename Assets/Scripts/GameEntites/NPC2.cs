@@ -17,9 +17,9 @@ namespace rqgames.GameEntities.NPCs
 
         protected void Update()
         {
-            transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x,
+           /* transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x,
                 transform.rotation.eulerAngles.y + Time.deltaTime * 10 * _sign,
-                0);
+                0);*/
         }
     }
 }

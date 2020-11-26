@@ -1,14 +1,13 @@
 ﻿using System;
 using DUCK.FSM;
-using UnityEngine;
 using System.Threading.Tasks;
 
 namespace rqgames.GameEntities.Playable
 {
-    public class TimedTransition : Transition<Player.PlayerStates>
+    public class DelayTransition : Transition<FSMCommon.State>
     {
         private int _duration;
-        public TimedTransition(Player.PlayerStates from, Player.PlayerStates to, int duration, Func<bool> testConditionFunction = null)
+        public DelayTransition(FSMCommon.State from, FSMCommon.State to, int duration = 20, Func<bool> testConditionFunction = null)
             : base(from, to, testConditionFunction)
 
         {
@@ -26,4 +25,6 @@ namespace rqgames.GameEntities.Playable
             Complete();
         }
     }
+
+
 }

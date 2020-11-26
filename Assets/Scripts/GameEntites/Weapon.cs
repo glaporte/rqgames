@@ -5,6 +5,8 @@ namespace rqgames.GameEntities
 {
     public class Weapon : MonoBehaviour, IPooledGameEntities
     {
+        public const string WeaponTag = "Weapon";
+
         public Stack<GameObject> Container { get; set; }
 
         private void Start()
@@ -13,7 +15,16 @@ namespace rqgames.GameEntities
 
         public void OnDie()
         {
-            Init.PooledGameData.ReleaseWeapon(this.gameObject);
+            gameObject.SetActive(false);
+            Container.Push(this.gameObject);
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.tag == NPCs.NPC.NPCTag || other.tag == Playable.Player.PlayerTag)
+            {
+                OnDie();
+            }
         }
 
         public void Proc(Vector3 position, Vector3 velocity, int layer)

@@ -20,6 +20,9 @@ namespace rqgames.gameconfig
         private int? _countNpc;
         public int CountNpc => _countNpc ?? CountNpcCahe();
 
+        [Range(3, 8)]
+        public float MoveRowTime = 5;
+
         private int CountNpcCahe()
         {
             _countNpc = NpcRows * NpcCols;

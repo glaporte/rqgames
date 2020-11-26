@@ -6,11 +6,11 @@ namespace rqgames.gameconfig
     public class PlayerConfig : ScriptableObject
     {
         public int LifeCount = 3;
-        [Range(1, 5)]
-        public float LateralSpeed = 2;
+        [Range(4, 8)]
+        public float LateralSpeed = 6;
         public float InvulnerabilityTime = 2;
 
-        [Range(0.03f, 0.2f)]
+        [Range(0.1f, 0.3f)]
         public float MoveTime = 0.05f;
 
         [Range(0.12f, 0.4f)]

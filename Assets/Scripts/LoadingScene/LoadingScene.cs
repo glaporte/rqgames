@@ -39,12 +39,6 @@ namespace rqgames.Init
             weapon.SetActive(true);
             weapon.GetComponent<Weapon>().Proc(position, velocity, layer);
         }
-
-        public static void ReleaseWeapon(GameObject weapon)
-        {
-            Weapons.Push(weapon.transform.parent.gameObject);
-            weapon.transform.parent.gameObject.SetActive(false);
-        }
     }
 
     public class LoadingScene : MonoBehaviour
