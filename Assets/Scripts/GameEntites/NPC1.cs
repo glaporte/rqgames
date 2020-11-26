@@ -1,8 +1,8 @@
 ﻿using UnityEngine;
 
-namespace rqgames.GameEntities
+namespace rqgames.GameEntities.NPCs
 {
-    public class NPC1 : NPC
+    public class NPC1 : NPCs.NPC
     {
         override protected void InitNPC()
         {

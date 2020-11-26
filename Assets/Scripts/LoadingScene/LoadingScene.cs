@@ -24,7 +24,7 @@ namespace rqgames.Init
 
     public static class PooledGameData
     {
-        public static Player Player;
+        public static rqgames.GameEntities.Playable.Player Player;
         public static List<Stack<GameObject>> NPCs;
         public static Stack<GameObject> Weapons;
     }
@@ -58,17 +58,17 @@ namespace rqgames.Init
         {
             if (obj.tag == "Player")
                 StartCoroutine(HandlePlayer(obj));
-            else if (obj.GetComponent<rqgames.GameEntities.NPC1>() != null)
+            else if (obj.GetComponent<rqgames.GameEntities.NPCs.NPC1>() != null)
             {
                 LoadedGameData.NPC1 = obj;
                 StartCoroutine(HandlePooled(obj, _gameConfig.CountNpc1, PooledGameData.NPCs[0]));
             }
-            else if (obj.GetComponent<rqgames.GameEntities.NPC2>() != null)
+            else if (obj.GetComponent<rqgames.GameEntities.NPCs.NPC2>() != null)
             {
                 LoadedGameData.NPC2 = obj;
                 StartCoroutine(HandlePooled(obj, _gameConfig.CountNpc2, PooledGameData.NPCs[1]));
             }
-            else if (obj.GetComponent<rqgames.GameEntities.NPC3>() != null)
+            else if (obj.GetComponent<rqgames.GameEntities.NPCs.NPC3>() != null)
             {
                 LoadedGameData.NPC3 = obj;
                 StartCoroutine(HandlePooled(obj, _gameConfig.CountNpc3, PooledGameData.NPCs[2]));
@@ -90,7 +90,7 @@ namespace rqgames.Init
             GameObject instance = Instantiate(pl);
             DontDestroyOnLoad(instance);
 
-            PooledGameData.Player = instance.GetComponentInChildren<Player>();
+            PooledGameData.Player = instance.GetComponentInChildren<GameEntities.Playable.Player>();
             PooledGameData.Player.gameObject.SetActive(false);
             yield break;
         }

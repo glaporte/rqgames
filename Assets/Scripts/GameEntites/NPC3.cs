@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace rqgames.GameEntities
+namespace rqgames.GameEntities.NPCs
 {
     public class NPC3 : NPC
     {

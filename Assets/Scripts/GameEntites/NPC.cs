@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using DUCK.FSM;
 using UnityEngine;
 
-namespace rqgames.GameEntities
+namespace rqgames.GameEntities.NPCs
 {
     public class NPC : MonoBehaviour, IPooledGameEntities
     {
         protected FiniteStateMachine<States> _fsm;
         private const string IDLE_COMMAND = "idle";
-        private const string ATTACK_COMMAND = "move";
+        private const string ATTACK_COMMAND = "attack";
 
         public Stack<GameObject> Container { get; set; }
 

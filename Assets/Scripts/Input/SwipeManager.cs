@@ -4,16 +4,24 @@ using UnityEngine.Events;
 
 namespace rqgames.InputManagement
 {
+    [System.Serializable]
+    public class ScreenPositionEvent : UnityEvent<Vector2>
+    {
+        public Vector2 ScreenPosition;
+    }
+
+
     public class SwipeManager : MonoBehaviour
     {
 
-        public float swipeThreshold = 50f;
+        public float swipeThreshold = 25f;
         public float timeThreshold = 0.3f;
 
         public readonly UnityEvent OnSwipeLeft = new UnityEvent();
         public readonly UnityEvent OnSwipeRight = new UnityEvent();
         public readonly UnityEvent OnSwipeUp = new UnityEvent();
         public readonly UnityEvent OnSwipeDown = new UnityEvent();
+        public readonly UnityEvent<Vector2> OnSwipeRelease = new ScreenPositionEvent();
 
         private Vector2 fingerDown;
         private DateTime fingerDownTime;
@@ -33,7 +41,10 @@ namespace rqgames.InputManagement
                 this.fingerDown = Input.mousePosition;
                 this.fingerUpTime = DateTime.Now;
                 this.CheckSwipe();
+                OnSwipeRelease.Invoke(Input.mousePosition);
             }
+
+
             foreach (Touch touch in Input.touches)
             {
                 if (touch.phase == TouchPhase.Began)
@@ -47,8 +58,15 @@ namespace rqgames.InputManagement
                     this.fingerDown = touch.position;
                     this.fingerUpTime = DateTime.Now;
                     this.CheckSwipe();
+                    OnSwipeRelease.Invoke(touch.position);
                 }
             }
+
+            if (Input.GetKey(KeyCode.LeftArrow))
+                this.OnSwipeLeft.Invoke();
+
+            if (Input.GetKey(KeyCode.RightArrow))
+                this.OnSwipeRight.Invoke();
         }
 
         private void CheckSwipe()
