@@ -48,12 +48,11 @@ MonoBehaviour:
     - Enemies
     m_MainAsset: {fileID: 0}
     m_TargetAsset: {fileID: 0}
-  - m_GUID: 5d76086286e454021ba8e49b54f2b8b1
+  - m_GUID: ae0b9858535c64d2bb92c6464d45ae6b
     m_Address: Assets/Prefabs/Projectile.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - default
-    - Weapon
     m_MainAsset: {fileID: 0}
     m_TargetAsset: {fileID: 0}
   m_ReadOnly: 0

@@ -15,3 +15,6 @@ MonoBehaviour:
   LifeCount: 3
   LateralSpeed: 2
   InvulnerabilityTime: 2
+  MoveTime: 0.05
+  AttackTime: 0.2
+  ProjectileSpeed: 3

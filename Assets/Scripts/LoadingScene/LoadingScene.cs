@@ -11,6 +11,9 @@ namespace rqgames.Init
     public static class GlobalVariables
     {
         public static gameconfig.GameConfig GameConfig;
+
+        public static readonly int AllyLayer = LayerMask.NameToLayer("Ally");
+        public static readonly int EnemyLayer = LayerMask.NameToLayer("Enemy");
     }
 
     public static class LoadedGameData
@@ -27,6 +30,21 @@ namespace rqgames.Init
         public static rqgames.GameEntities.Playable.Player Player;
         public static List<Stack<GameObject>> NPCs;
         public static Stack<GameObject> Weapons;
+
+        public static void PopWeapon(Vector3 position, Vector3 velocity, int layer)
+        {
+            if (Weapons.Count == 0)
+                return;
+            GameObject weapon = Weapons.Pop();
+            weapon.SetActive(true);
+            weapon.GetComponent<Weapon>().Proc(position, velocity, layer);
+        }
+
+        public static void ReleaseWeapon(GameObject weapon)
+        {
+            Weapons.Push(weapon.transform.parent.gameObject);
+            weapon.transform.parent.gameObject.SetActive(false);
+        }
     }
 
     public class LoadingScene : MonoBehaviour
@@ -90,7 +108,7 @@ namespace rqgames.Init
             GameObject instance = Instantiate(pl);
             DontDestroyOnLoad(instance);
 
-            PooledGameData.Player = instance.GetComponentInChildren<GameEntities.Playable.Player>();
+            PooledGameData.Player = instance.GetComponent<GameEntities.Playable.Player>();
             PooledGameData.Player.gameObject.SetActive(false);
             yield break;
         }

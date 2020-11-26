@@ -5,24 +5,24 @@ using System.Threading.Tasks;
 
 namespace rqgames.GameEntities.Playable
 {
-    public class AttackTransition : Transition<Player.PlayerStates>
+    public class TimedTransition : Transition<Player.PlayerStates>
     {
-        public AttackTransition(Player.PlayerStates from, Player.PlayerStates to, Func<bool> testConditionFunction = null)
+        private int _duration;
+        public TimedTransition(Player.PlayerStates from, Player.PlayerStates to, int duration, Func<bool> testConditionFunction = null)
             : base(from, to, testConditionFunction)
 
         {
+            _duration = duration;
         }
 
         public override void Begin()
         {
-            Debug.Log("start fire");
             Task.Run(Finish);
         }
 
         private void Finish()
         {
-            Task.Delay(1000).Wait();
-            Debug.Log("end fire");
+            Task.Delay(_duration).Wait();
             Complete();
         }
     }
