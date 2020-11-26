@@ -7,7 +7,7 @@ namespace rqgames.Game
     public class Game : MonoBehaviour
     {
         private float _frustumWidth;
-        private float _topY;
+        public float TopY { get; internal set; }
 
 
         private void Start()
@@ -15,14 +15,16 @@ namespace rqgames.Game
             float frustumHeight = 2.0f * 20 * Mathf.Tan(Camera.main.fieldOfView * 0.5f * Mathf.Deg2Rad);
             _frustumWidth = (int)(frustumHeight * Camera.main.aspect);
 
-            _topY = frustumHeight / 2;
+            TopY = frustumHeight / 2;
 
             int xOffset = 4;
             int yOffset = 3;
 
             int startX = -(Init.GlobalVariables.GameConfig.NpcCols * xOffset) / 2;
-            int startY = (int)(_topY - 2);
+            int startY = (int)(TopY - 2);
             int curX = startX;
+
+            PooledGameData.Player.StartGame(this);
 
             for (int i = 0; i < Init.GlobalVariables.GameConfig.NpcRows; i++)
             {
@@ -51,11 +53,6 @@ namespace rqgames.Game
             if (index == -1)
                 return null;
             return PooledGameData.NPCs[index];
-        }
-
-        private void Update()
-        {
-        
         }
     }
 }

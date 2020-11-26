@@ -24,7 +24,7 @@ namespace rqgames.Init
 
     public static class PooledGameData
     {
-        public static GameObject Player;
+        public static Player Player;
         public static List<Stack<GameObject>> NPCs;
         public static Stack<GameObject> Weapons;
     }
@@ -56,7 +56,7 @@ namespace rqgames.Init
 
         private void LoadCallback(GameObject obj)
         {
-            if (obj.GetComponent<rqgames.GameEntities.Player>() != null)
+            if (obj.tag == "Player")
                 StartCoroutine(HandlePlayer(obj));
             else if (obj.GetComponent<rqgames.GameEntities.NPC1>() != null)
             {
@@ -87,9 +87,11 @@ namespace rqgames.Init
             if (LoadedGameData.Player != null)
                 yield break;
             LoadedGameData.Player = pl;
-            PooledGameData.Player = Instantiate(pl);
-            DontDestroyOnLoad(PooledGameData.Player);
-            PooledGameData.Player.SetActive(false);
+            GameObject instance = Instantiate(pl);
+            DontDestroyOnLoad(instance);
+
+            PooledGameData.Player = instance.GetComponentInChildren<Player>();
+            PooledGameData.Player.gameObject.SetActive(false);
             yield break;
         }
 

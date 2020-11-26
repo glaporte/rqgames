@@ -17,16 +17,13 @@ MonoBehaviour:
     m_SerializedData: []
   m_GUID: 862b338cd49554d00be02469a44c7d3e
   m_SerializeEntries:
-  - m_GUID: 0a3b99aa3c71f44c39fb0f5c105acbde
+  - m_GUID: e7fb0915abdc24fe69d38c150762f156
     m_Address: Assets/Prefabs/MainCharacter.prefab
     m_ReadOnly: 0
     m_SerializedLabels:
     - default
-    - Player
-    m_MainAsset: {fileID: 4253883625205030448, guid: 0a3b99aa3c71f44c39fb0f5c105acbde,
-      type: 3}
-    m_TargetAsset: {fileID: 4253883625205030448, guid: 0a3b99aa3c71f44c39fb0f5c105acbde,
-      type: 3}
+    m_MainAsset: {fileID: 0}
+    m_TargetAsset: {fileID: 0}
   - m_GUID: 89ae2ff6774d5400b89339fb6373c851
     m_Address: Assets/Prefabs/NPC_1.prefab
     m_ReadOnly: 0
