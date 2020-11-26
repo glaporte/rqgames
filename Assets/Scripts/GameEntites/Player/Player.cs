@@ -1,7 +1,5 @@
-﻿using System;
-using DUCK.FSM;
+﻿using DUCK.FSM;
 using UnityEngine;
-using System.Threading.Tasks;
 
 namespace rqgames.GameEntities.Playable
 {
@@ -14,15 +12,17 @@ namespace rqgames.GameEntities.Playable
 
         private const string IDLE_COMMAND = "idle";
         private const string ATTACK_COMMAND = "attack";
+        private const string MOVE_COMMAND = "move";
 
-        public enum States
+        public enum PlayerStates
         {
             Idle,
-            Attack
+            Attack,
+            Move,
         }
 
 
-        protected FiniteStateMachine<States> _fsm;
+        protected FiniteStateMachine<PlayerStates> _fsm;
 
 
         [SerializeField]
@@ -37,11 +37,19 @@ namespace rqgames.GameEntities.Playable
 
             _body = GetComponent<Rigidbody>();
 
-            AttackTransition _atk = new AttackTransition(States.Idle, States.Attack);
-            _fsm = FiniteStateMachine<States>.FromEnum();
-            _fsm.AddTransition(States.Idle, States.Attack, ATTACK_COMMAND, _atk);
-            _fsm.AddTransition(States.Attack, States.Idle, IDLE_COMMAND);
-            _fsm.Begin(States.Idle);
+
+            _fsm = FiniteStateMachine<PlayerStates>.FromEnum();
+
+            AttackTransition _atk = new AttackTransition(PlayerStates.Idle, PlayerStates.Attack);
+
+
+            _fsm.AddTransition(PlayerStates.Idle, PlayerStates.Attack, ATTACK_COMMAND, _atk);
+            _fsm.AddTransition(PlayerStates.Attack, PlayerStates.Idle, IDLE_COMMAND);
+            _fsm.AddTransition(PlayerStates.Idle, PlayerStates.Move, MOVE_COMMAND);
+
+            _fsm.OnEnter(PlayerStates.Attack, () => { });
+
+            _fsm.Begin(PlayerStates.Idle);
         }
 
         private void Fire(Vector2 screenPos)
@@ -91,27 +99,4 @@ namespace rqgames.GameEntities.Playable
             transform.localRotation = Quaternion.Euler(0, angle, 0);
         }
     }
-
-    public class AttackTransition : Transition<Player.States>
-    {
-        public AttackTransition(Player.States from, Player.States to, Func<bool> testConditionFunction = null)
-            : base(from, to, testConditionFunction)
-
-        {
-        }
-
-        public override void Begin()
-        {
-            Debug.Log("start fire");
-            Task.Run(Finish);
-        }
-
-        private void Finish()
-        {
-            Task.Delay(1000).Wait();
-            Debug.Log("end fire");
-            Complete();
-        }
-    }
-
 }
