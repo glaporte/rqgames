@@ -10,8 +10,13 @@ namespace rqgames.Game
         private float _frustumWidth;
         public float TopY { get; internal set; }
 
-        private const int xOffset = 4;
-        private const float npcMoveTime = 0.3f;
+        private const int xOffset = 3;
+        private const float npcMoveTime = 0.5f;
+        private const float waitBeforeMoveNextNpc = 0.35f;
+
+        private int RowsXCell = 0;
+        private int RowsSideSign = 1;
+        private bool _hasChangedSign = false;
 
         private List<List<GameObject>> NPCs;
 
@@ -50,24 +55,36 @@ namespace rqgames.Game
                 startY -= yOffset;
             }
 
-            Invoke("MoveRows", Init.GlobalVariables.GameConfig.MoveRowTime);
+            Invoke("MoveRows", Init.GlobalVariables.GameConfig.SwapNPCTick);
         }
 
         private void MoveRows()
         {
+            if (Mathf.Abs(RowsXCell) >= 1 && !_hasChangedSign)
+            {
+                RowsSideSign *= -1;
+                _hasChangedSign = true;
+            }
+            else
+            {
+                _hasChangedSign = false;
+            }
+
+            RowsXCell += RowsSideSign;
+
             for (int i = 0; i < NPCs.Count; i++)
             {
-                int sign = i % 2 == 0 ? 1 : -1;
+                int sign = i % 2 == 0 ? RowsSideSign : -RowsSideSign;
                 List<GameObject> curRow = new List<GameObject>(NPCs[i]);
                 if (sign < 0)
                     curRow.Reverse();
                 StartCoroutine(MoveRow(curRow, i, sign));
             }
-            Invoke("MoveRows", Init.GlobalVariables.GameConfig.MoveRowTime + MoveTimeAll);
+            Invoke("MoveRows", Init.GlobalVariables.GameConfig.SwapNPCTick + MoveTimeAll);
         }
 
-        public float MoveTimeRow => npcMoveTime * GlobalVariables.GameConfig.NpcCols;
-        public float MoveTimeAll => MoveTimeRow * GlobalVariables.GameConfig.NpcRows;
+        public float MoveTimeAll => (GlobalVariables.GameConfig.NpcRows - 1) +
+            (GlobalVariables.GameConfig.NpcCols - 1) * npcMoveTime * waitBeforeMoveNextNpc + npcMoveTime * 2;
 
         private IEnumerator MoveRow(List<GameObject> npcs, int listIndex, int sign)
         {
@@ -82,16 +99,29 @@ namespace rqgames.Game
 
         private IEnumerator MoveNpc(GameObject npc, Vector3 dstPos, int listIndex)
         {
-            yield return new WaitForSeconds(npcMoveTime * listIndex * 0.35f);
+            yield return new WaitForSeconds(npcMoveTime * listIndex * waitBeforeMoveNextNpc);
 
+            Vector3 startPos = npc.transform.position;
             float sign = Mathf.Sign(dstPos.x - npc.transform.position.x);
             GameEntities.NPCs.NPC npcC = npc.GetComponent<GameEntities.NPCs.NPC>();
             npcC.StartMove();
             float curTime = 0;
+
+            // Percent value
+            float startMove = 0.5f;
+            float endMove = 0.4f;
+            float moveTime = 0;
+            float moveDuration = (1f - startMove) * npcMoveTime + endMove * npcMoveTime;
+
             while (curTime < npcMoveTime)
             {
                 curTime += Time.deltaTime;
                 npcC.Rotate(curTime / npcMoveTime * sign);
+                if (curTime > startMove * npcMoveTime)
+                {
+                    npc.transform.position = Vector3.Lerp(startPos, dstPos, moveTime / moveDuration);
+                    moveTime += Time.deltaTime;
+                }
                 yield return null;
             }
 
@@ -100,8 +130,14 @@ namespace rqgames.Game
             {
                 curTime += Time.deltaTime;
                 npcC.Rotate((1f - (curTime / npcMoveTime)) * sign);
+                if (curTime < endMove * npcMoveTime)
+                {
+                    npc.transform.position = Vector3.Lerp(startPos, dstPos, moveTime / moveDuration);
+                    moveTime += Time.deltaTime;
+                }
                 yield return null;
             }
+            Debug.Log(moveTime + " & " + moveDuration);
             npcC.EndMove();
         }
 

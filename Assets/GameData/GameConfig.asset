@@ -17,3 +17,4 @@ MonoBehaviour:
   Npc3Ratio: 0.52
   NpcRows: 4
   NpcCols: 8
+  SwapNPCTick: 2.19

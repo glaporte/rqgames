@@ -14,9 +14,17 @@ namespace rqgames.GameEntities.NPCs
         public Stack<GameObject> Container { get; set; }
 
         protected Quaternion InitialRotation { get; set; }
+        protected Quaternion RotationOnStartMove { get; set; }
+
+        protected float _internalTimer = 0;
+        protected float _rndSmall;
+        protected float _rndMedium;
+
 
         private void Start()
         {
+            _rndMedium = UnityEngine.Random.Range(-15, 15);
+            _rndSmall = UnityEngine.Random.Range(-1f, 1f);
             InitialRotation = transform.rotation;
             _fsm = FiniteStateMachine<Playable.FSMCommon.State>.FromEnum();
             _fsm.AddTransition(Playable.FSMCommon.State.Idle, Playable.FSMCommon.State.Attack, Playable.FSMCommon.ATTACK_COMMAND);
@@ -42,14 +50,12 @@ namespace rqgames.GameEntities.NPCs
 
         virtual public void Rotate(float intensity)
         {
-            if (intensity == 0)
-                transform.rotation = InitialRotation;
-            else
-                transform.localRotation = InitialRotation * Quaternion.Euler(0, 0, intensity * 30);
+            transform.localRotation = RotationOnStartMove * Quaternion.Euler(0, 0, intensity * 30);
         }
 
         public void StartMove()
         {
+            RotationOnStartMove = transform.rotation;
             _fsm.IssueCommand(Playable.FSMCommon.MOVE_COMMAND);
         }
 

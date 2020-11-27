@@ -140,6 +140,7 @@ namespace rqgames.GameEntities.Playable
 
         private void Fire()
         {
+            _body.velocity = Vector3.zero;
             float radians = _turretAngle * Mathf.Deg2Rad;
             Vector3 vel = new Vector3(-Mathf.Cos(radians), Mathf.Sin(radians), 0);
             vel = vel.normalized * _config.ProjectileSpeed;
