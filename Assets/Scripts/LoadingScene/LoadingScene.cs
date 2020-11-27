@@ -112,7 +112,7 @@ namespace rqgames.Init
             for (int i = 0; i < max; i++)
             {
                 GameObject go = Instantiate(npc);
-                go.GetComponent<IPooledGameEntities>().Container = container;
+                go.GetComponent<IPooledGameEntities>().DataContainer = container;
                 DontDestroyOnLoad(go);
                 container.Push(go);
                 go.SetActive(false);

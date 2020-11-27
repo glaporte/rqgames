@@ -207,7 +207,6 @@ namespace rqgames.GameEntities.Playable
                 _fsm.IssueCommand(FSMCommon.IDLE_COMMAND);
             }
         }
-
      
         private void Fire()
         {

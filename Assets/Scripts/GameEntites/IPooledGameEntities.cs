@@ -6,7 +6,7 @@ namespace rqgames.GameEntities
 {
     public interface IPooledGameEntities
     {
-        Stack<GameObject> Container { get; set; }
+        Stack<GameObject> DataContainer { get; set; }
 
         void OnDie();
     }

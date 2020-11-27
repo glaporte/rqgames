@@ -7,7 +7,7 @@ namespace rqgames.GameEntities
     {
         public const string WeaponTag = "Weapon";
 
-        public Stack<GameObject> Container { get; set; }
+        public Stack<GameObject> DataContainer { get; set; }
 
         private void Start()
         {
@@ -17,7 +17,7 @@ namespace rqgames.GameEntities
         {
             CancelInvoke();
             gameObject.SetActive(false);
-            Container.Push(this.gameObject);
+            DataContainer.Push(this.gameObject);
         }
 
         private void OnTriggerEnter(Collider other)

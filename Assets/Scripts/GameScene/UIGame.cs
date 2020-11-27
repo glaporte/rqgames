@@ -26,8 +26,8 @@ namespace rqgames.Game
 
         private void RefreshUI()
         {
-            SetScore(0);
-            SetWave(1);
+            SetScore(rqgames.Init.PooledGameData.Player.CurrentScore.CurrentScore);
+            SetWave(rqgames.Init.PooledGameData.Player.CurrentScore.CurrentWave);
             SetLife(rqgames.Init.PooledGameData.Player.CurrentScore.CurrentLife);
         }
 

@@ -16,6 +16,7 @@ namespace rqgames.GameEntities.NPCs
             transform.rotation = Quaternion.Euler(transform.rotation.eulerAngles.x,
                     0,
                     Random.Range(MinMaxZAngle.x, MinMaxZAngle.y));
+            base.InitNPC();
         }
 
         override protected void UpdateNPC()

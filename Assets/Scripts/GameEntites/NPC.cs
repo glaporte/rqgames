@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using DUCK.FSM;
 using UnityEngine;
+using UnityEngine.Events;
 
 namespace rqgames.GameEntities.NPCs
 {
     public class NPC : MonoBehaviour, IPooledGameEntities
     {
         public const string NPCTag = "NPC";
-
 
         [SerializeField]
         protected rqgames.gameconfig.NPCConfig _config;
@@ -28,8 +28,10 @@ namespace rqgames.GameEntities.NPCs
 
         private int _difficulty = 100; // if _countAttack is max (10), each second attack has _countAttack / _difficulty chance to proc.
 
-        public Stack<GameObject> Container { get; set; }
-
+        public Stack<GameObject> DataContainer { get; set; }
+        private rqgames.Game.Game _game;
+        private List<GameObject> _gameContainer;
+        private int _startY;
 
         private void Start()
         {
@@ -55,6 +57,14 @@ namespace rqgames.GameEntities.NPCs
         virtual protected void InitNPC() { }
         virtual protected void UpdateNPC() { }
 
+        public void Reset(rqgames.Game.Game game, List<GameObject> row, int startY)
+        {
+            _internalTimer = 0;
+            _game = game;
+            _startY = startY;
+            _gameContainer = row;
+        }
+
         private void Update()
         {
             UpdateNPC();
@@ -66,7 +76,6 @@ namespace rqgames.GameEntities.NPCs
                 _timerAttack = 0;
             }
         }
-
 
         private void OnTriggerEnter(Collider other)
         {
@@ -80,11 +89,6 @@ namespace rqgames.GameEntities.NPCs
         virtual public void Rotate(float intensity)
         {
             transform.localRotation = RotationOnLostIdle * Quaternion.Euler(0, 0, intensity * 30);
-        }
-
-        virtual public void MoveForward()
-        {
-
         }
 
         public void StartMove()
@@ -111,8 +115,10 @@ namespace rqgames.GameEntities.NPCs
 
         public void OnDie()
         {
+            transform.rotation = InitialRotation;
+            _game.NPCDie(this, _gameContainer);
             gameObject.SetActive(false);
-            Container.Push(this.gameObject);
+            DataContainer.Push(this.gameObject);
         }
     }
 

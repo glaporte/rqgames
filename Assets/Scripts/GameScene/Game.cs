@@ -19,6 +19,10 @@ namespace rqgames.Game
 
             public const float npcMoveTime = 0.3f;
             public const float waitBeforeMoveNextNpc = 0.35f; // percentage
+
+            public const float MoveXRowWait = 0.3f;
+
+            public int MoveY = 0;
         }
 
         public const string TeleportTag = "Teleport";
@@ -78,6 +82,7 @@ namespace rqgames.Game
                 if (container == null)
                     return;
                 GameObject npc = container.Pop();
+                npc.GetComponent<GameEntities.NPCs.NPC>().Reset(this, row, startY);
                 npc.SetActive(true);
                 npc.transform.position = new Vector3(curX, startY, 0);
                 curX += MovementData.xOffsetNPC;
@@ -85,11 +90,34 @@ namespace rqgames.Game
             }
         }
 
-        public float MoveTimeAllNPC => (GlobalVariables.GameConfig.NpcRows - 1) * 0.3f +
+        public void NPCDie(GameEntities.NPCs.NPC npc, List<GameObject> row)
+        {
+            row.Remove(npc.gameObject);
+            if (row.Count == 0)
+            {
+                PooledGameData.Player.CurrentScore.CurrentWave++;
+                NPCs.Remove(row);
+            }
+        }
+
+        public float GlobalMoveYTime => (GlobalVariables.GameConfig.NpcRows - 1) * MovementData.npcMoveTime + MovementData.npcMoveTime * 2;
+
+        public float GlobalMoveXTime => (GlobalVariables.GameConfig.NpcRows - 1) * MovementData.MoveXRowWait +
             (GlobalVariables.GameConfig.NpcCols - 1) * MovementData.npcMoveTime * MovementData.waitBeforeMoveNextNpc + MovementData.npcMoveTime * 2;
 
         private void AddWave()
         {
+            _moveData.MoveY++;
+
+            if (NPCs.Count >= rqgames.Init.GlobalVariables.GameConfig.NpcRows + rqgames.gameconfig.GameConfig.ExtraRows)
+            {
+                int count = NPCs[NPCs.Count - 1].Count;
+                for (int i = 0; i < count; i++)
+                {
+                    GameObject go = NPCs[NPCs.Count - 1][0]; // Ondie will remove it from container
+                    go.GetComponent<rqgames.GameEntities.NPCs.NPC>().OnDie();
+                }
+            }
             //VerticalMove
             for (int i = NPCs.Count - 1; i >= 0; i--)
             {
@@ -97,17 +125,15 @@ namespace rqgames.Game
                 StartCoroutine(MoveRow(curRow, NPCs.Count - i - 1, 0, 1));
             }
             _moveData.CountPassByCenter = 0;
-            StartCoroutine(CreateNewRow());
+            Invoke(nameof(CreateNewRow), GlobalMoveYTime);
         }
 
-        private IEnumerator CreateNewRow()
+        private void CreateNewRow()
         {
-            yield return new WaitForSeconds(1.5f);
-
             List<GameObject> row = new List<GameObject>();
             NPCs.Insert(0, row);
             CreateRow(StartY, row);
-            Invoke("MoveRows", Init.GlobalVariables.GameConfig.SwapNPCTick);
+            Invoke("MoveRows", GlobalVariables.GameConfig.SwapNPCTick);
 
         }
 
@@ -140,7 +166,7 @@ namespace rqgames.Game
                     curRow.Reverse();
                 StartCoroutine(MoveRow(curRow, i, sign));
             }
-            Invoke("MoveRows", Init.GlobalVariables.GameConfig.SwapNPCTick + MoveTimeAllNPC);
+            Invoke("MoveRows", Init.GlobalVariables.GameConfig.SwapNPCTick + GlobalMoveXTime);
         }
 
         private IEnumerator MoveRow(List<GameObject> npcs, int listIndex, int sign, int ySign = 0)
@@ -148,7 +174,7 @@ namespace rqgames.Game
             if (ySign != 0)
                 yield return new WaitForSeconds(listIndex * MovementData.npcMoveTime);
             else
-                yield return new WaitForSeconds(listIndex * 0.3f);
+                yield return new WaitForSeconds(listIndex * MovementData.MoveXRowWait);
 
             for (int i = 0; i < npcs.Count; i++)
             {
@@ -162,7 +188,7 @@ namespace rqgames.Game
 
         private IEnumerator MoveNpc(GameObject npc, Vector3 dstPos, int listIndex, Vector2 signs)
         {
-            if (signs.y == 0)
+            if (signs.x != 0)
                 yield return new WaitForSeconds(MovementData.npcMoveTime * listIndex * MovementData.waitBeforeMoveNextNpc);
 
             Vector3 startPos = npc.transform.position;
