@@ -30,7 +30,7 @@ namespace rqgames.GameEntities.NPCs
 
         public Stack<GameObject> DataContainer { get; set; }
         private rqgames.Game.Game _game;
-        private List<GameObject> _gameContainer;
+        private Game.Game.Wave _gameContainer;
         private int _startY;
 
         private void Start()
@@ -57,7 +57,7 @@ namespace rqgames.GameEntities.NPCs
         virtual protected void InitNPC() { }
         virtual protected void UpdateNPC() { }
 
-        public void Reset(rqgames.Game.Game game, List<GameObject> row, int startY)
+        public void Reset(rqgames.Game.Game game, Game.Game.Wave row, int startY)
         {
             _internalTimer = 0;
             _game = game;
@@ -81,7 +81,7 @@ namespace rqgames.GameEntities.NPCs
         {
             if (other.gameObject.layer == Init.GlobalVariables.AllyLayer && other.tag == Weapon.WeaponTag)
             {
-                OnDie();
+                OnDie(true);
                 Init.PooledGameData.Player.OnKillEnemy();
             }
         }
@@ -113,9 +113,11 @@ namespace rqgames.GameEntities.NPCs
             _fsm.IssueCommand(Playable.FSMCommon.IDLE_COMMAND);
         }
 
-        public void OnDie()
+        public void OnDie(bool byAlly)
         {
             transform.rotation = InitialRotation;
+            if (byAlly)
+                _gameContainer.Killed++;
             _game.NPCDie(this, _gameContainer);
             gameObject.SetActive(false);
             DataContainer.Push(this.gameObject);

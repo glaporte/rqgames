@@ -8,6 +8,6 @@ namespace rqgames.GameEntities
     {
         Stack<GameObject> DataContainer { get; set; }
 
-        void OnDie();
+        void OnDie(bool byAlly);
     }
 }

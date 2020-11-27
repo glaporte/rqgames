@@ -13,7 +13,7 @@ namespace rqgames.GameEntities
         {
         }
 
-        public void OnDie()
+        public void OnDie(bool byAlly)
         {
             CancelInvoke();
             gameObject.SetActive(false);
@@ -24,7 +24,7 @@ namespace rqgames.GameEntities
         {
             if (other.tag == NPCs.NPC.NPCTag || other.tag == Playable.Player.PlayerTag)
             {
-                OnDie();
+                OnDie(false);
             }
         }
 
