@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DUCK.FSM;
 using UnityEngine;
 
@@ -9,9 +8,11 @@ namespace rqgames.GameEntities.NPCs
     {
         public const string NPCTag = "NPC";
 
-        protected FiniteStateMachine<Playable.FSMCommon.State> _fsm;
 
-        public Stack<GameObject> Container { get; set; }
+        [SerializeField]
+        protected rqgames.gameconfig.NPCConfig _config;
+
+        protected FiniteStateMachine<Playable.FSMCommon.State> _fsm;
 
         protected Quaternion InitialRotation { get; set; }
         protected Quaternion RotationOnStartMove { get; set; }
@@ -20,9 +21,19 @@ namespace rqgames.GameEntities.NPCs
         protected float _rndSmall;
         protected float _rndMedium;
 
+        protected float _weaponSpeed;
+        protected float _countAttack;
+
+        private float _timerAttack;
+
+        private int _difficulty = 100; // if _countAttack is max (10), each second attack has _countAttack / _difficulty chance to proc.
+
+        public Stack<GameObject> Container { get; set; }
+
 
         private void Start()
         {
+            _timerAttack = 0;
             _rndMedium = UnityEngine.Random.Range(-15, 15);
             _rndSmall = UnityEngine.Random.Range(-1f, 1f);
             InitialRotation = transform.rotation;
@@ -35,9 +46,27 @@ namespace rqgames.GameEntities.NPCs
             _fsm.AddTransition(Playable.FSMCommon.State.Move, Playable.FSMCommon.State.Move, Playable.FSMCommon.MOVE_COMMAND);
             _fsm.AddTransition(Playable.FSMCommon.State.Attack, Playable.FSMCommon.State.Move, Playable.FSMCommon.MOVE_COMMAND);
 
+            _fsm.OnEnter(Playable.FSMCommon.State.Attack, Fire);
+
             _fsm.Begin(Playable.FSMCommon.State.Idle);
             InitNPC();
         }
+
+        virtual protected void InitNPC() { }
+        virtual protected void UpdateNPC() { }
+
+        private void Update()
+        {
+            UpdateNPC();
+            _timerAttack += Time.deltaTime;
+            if (_timerAttack > 1)
+            {
+                if (UnityEngine.Random.Range(0, 1f) < _countAttack / _difficulty)
+                    _fsm.IssueCommand(Playable.FSMCommon.ATTACK_COMMAND);
+                _timerAttack = 0;
+            }
+        }
+
 
         private void OnTriggerEnter(Collider other)
         {
@@ -64,9 +93,16 @@ namespace rqgames.GameEntities.NPCs
             _fsm.IssueCommand(Playable.FSMCommon.IDLE_COMMAND);
         }
 
-        virtual protected void InitNPC()
+        virtual protected void Fire()
         {
+            Vector3 vel = Init.PooledGameData.Player.transform.position - transform.position;
+            vel = vel.normalized * _weaponSpeed;
+            Vector3 pos = transform.position + transform.rotation * Vector3.back * transform.localScale.z;
+            Init.PooledGameData.PopWeapon(pos,
+                vel,
+                Init.GlobalVariables.EnemyLayer);
 
+            _fsm.IssueCommand(Playable.FSMCommon.IDLE_COMMAND);
         }
 
         public void OnDie()

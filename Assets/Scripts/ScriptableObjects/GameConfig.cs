@@ -35,7 +35,6 @@ namespace rqgames.gameconfig
         private int CountNpc1Cache()
         {
             _countNpc1 = (int)(CountNpc * Npc1Ratio) + 1;
-            Debug.Log(_countNpc1.Value);
             return _countNpc1.Value;
         }
 
@@ -62,7 +61,7 @@ namespace rqgames.gameconfig
 
         private int CountMaxWeaponCache()
         {
-            _countMaxWeapon = CountNpc + 30;
+            _countMaxWeapon = CountNpc * 2 + 30;
             return _countMaxWeapon.Value;
         }
 

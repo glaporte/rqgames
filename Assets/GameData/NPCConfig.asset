@@ -9,12 +9,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd0ae9447200e4705844d3362a630933, type: 3}
-  m_Name: GameConfig
+  m_Script: {fileID: 11500000, guid: d5276b8746da24eea915c633bcc3d871, type: 3}
+  m_Name: NPCConfig
   m_EditorClassIdentifier: 
-  Npc1Ratio: 0.381
-  Npc2Ratio: 0.297
-  Npc3Ratio: 0.298
-  NpcRows: 4
-  NpcCols: 8
-  SwapNPCTick: 2.31
+  NPC1WeaponSpeed: 1.55
+  NPC2WeaponSpeed: 1.3
+  NPC3WeaponSpeed: 3
+  NPC1AttackCount: 2
+  NPC2AttackCount: 4
+  NPC3AttackCount: 7

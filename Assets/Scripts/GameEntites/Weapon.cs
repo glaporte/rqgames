@@ -15,6 +15,7 @@ namespace rqgames.GameEntities
 
         public void OnDie()
         {
+            CancelInvoke();
             gameObject.SetActive(false);
             Container.Push(this.gameObject);
         }
@@ -35,6 +36,8 @@ namespace rqgames.GameEntities
             Vector3 inverseVel = velocity;
             inverseVel *= -1;
             transform.rotation = Quaternion.LookRotation(inverseVel);
+
+            Invoke(nameof(OnDie), 15);
         }
     }
 }
