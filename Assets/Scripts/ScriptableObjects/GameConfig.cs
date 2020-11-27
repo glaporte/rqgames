@@ -23,9 +23,11 @@ namespace rqgames.gameconfig
         [Range(1, 4)]
         public float SwapNPCTick = 5;
 
+        public const int ExtraRows = 3;
+
         private int CountNpcCahe()
         {
-            _countNpc = NpcRows * NpcCols;
+            _countNpc = (ExtraRows + NpcRows) * NpcCols; // 3 extra rows
             return _countNpc.Value;
         }
 

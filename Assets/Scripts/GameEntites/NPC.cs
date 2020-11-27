@@ -15,7 +15,7 @@ namespace rqgames.GameEntities.NPCs
         protected FiniteStateMachine<Playable.FSMCommon.State> _fsm;
 
         protected Quaternion InitialRotation { get; set; }
-        protected Quaternion RotationOnStartMove { get; set; }
+        protected Quaternion RotationOnLostIdle { get; set; }
 
         protected float _internalTimer = 0;
         protected float _rndSmall;
@@ -39,15 +39,15 @@ namespace rqgames.GameEntities.NPCs
             InitialRotation = transform.rotation;
             _fsm = FiniteStateMachine<Playable.FSMCommon.State>.FromEnum();
             _fsm.AddTransition(Playable.FSMCommon.State.Idle, Playable.FSMCommon.State.Attack, Playable.FSMCommon.ATTACK_COMMAND);
+
             _fsm.AddTransition(Playable.FSMCommon.State.Attack, Playable.FSMCommon.State.Idle, Playable.FSMCommon.IDLE_COMMAND);
             _fsm.AddTransition(Playable.FSMCommon.State.Move, Playable.FSMCommon.State.Idle, Playable.FSMCommon.IDLE_COMMAND);
 
             _fsm.AddTransition(Playable.FSMCommon.State.Idle, Playable.FSMCommon.State.Move, Playable.FSMCommon.MOVE_COMMAND);
-            _fsm.AddTransition(Playable.FSMCommon.State.Move, Playable.FSMCommon.State.Move, Playable.FSMCommon.MOVE_COMMAND);
             _fsm.AddTransition(Playable.FSMCommon.State.Attack, Playable.FSMCommon.State.Move, Playable.FSMCommon.MOVE_COMMAND);
 
             _fsm.OnEnter(Playable.FSMCommon.State.Attack, Fire);
-
+            _fsm.OnExit(Playable.FSMCommon.State.Idle, () => { RotationOnLostIdle = transform.rotation; });
             _fsm.Begin(Playable.FSMCommon.State.Idle);
             InitNPC();
         }
@@ -59,7 +59,7 @@ namespace rqgames.GameEntities.NPCs
         {
             UpdateNPC();
             _timerAttack += Time.deltaTime;
-            if (_timerAttack > 1)
+            if (_timerAttack > 100)
             {
                 if (UnityEngine.Random.Range(0, 1f) < _countAttack / _difficulty)
                     _fsm.IssueCommand(Playable.FSMCommon.ATTACK_COMMAND);
@@ -70,21 +70,25 @@ namespace rqgames.GameEntities.NPCs
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.layer == Init.GlobalVariables.AllyLayer
-                && other.tag == Weapon.WeaponTag)
+            if (other.gameObject.layer == Init.GlobalVariables.AllyLayer && other.tag == Weapon.WeaponTag)
             {
                 OnDie();
+                Init.PooledGameData.Player.OnKillEnemy();
             }
         }
 
         virtual public void Rotate(float intensity)
         {
-            transform.localRotation = RotationOnStartMove * Quaternion.Euler(0, 0, intensity * 30);
+            transform.localRotation = RotationOnLostIdle * Quaternion.Euler(0, 0, intensity * 30);
+        }
+
+        virtual public void MoveForward()
+        {
+
         }
 
         public void StartMove()
         {
-            RotationOnStartMove = transform.rotation;
             _fsm.IssueCommand(Playable.FSMCommon.MOVE_COMMAND);
         }
 

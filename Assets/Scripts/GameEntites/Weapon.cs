@@ -31,12 +31,13 @@ namespace rqgames.GameEntities
         public void Proc(Vector3 position, Vector3 velocity, int layer)
         {
             gameObject.layer = layer;
+            position.z = 0;
             gameObject.transform.position = position;
             gameObject.GetComponent<Rigidbody>().velocity = velocity;
             Vector3 inverseVel = velocity;
             inverseVel *= -1;
             transform.rotation = Quaternion.LookRotation(inverseVel);
-
+            
             Invoke(nameof(OnDie), 15);
         }
     }

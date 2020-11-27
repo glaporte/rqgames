@@ -1,9 +1,59 @@
 ﻿using DUCK.FSM;
 using UnityEngine;
 using System.Collections.Generic;
+using System;
+using UnityEngine.Events;
 
 namespace rqgames.GameEntities.Playable
 {
+    [Serializable()]
+    public class PlayerScore
+    {
+        public UnityEvent OnChange = new UnityEvent();
+        
+        private int _currentScore;
+        public int CurrentScore
+        {
+            get { return _currentScore; }
+            set
+            {
+                if (value != _currentScore)
+                {
+                    _currentScore = value;
+                    OnChange.Invoke();
+                }
+            }
+        }
+
+        private int _currentLife;
+        public int CurrentLife
+        {
+            get { return _currentLife; }
+            set
+            {
+                if (value != _currentLife)
+                {
+                    _currentLife = value;
+                    OnChange.Invoke();
+                }
+            }
+        }
+
+        private int _currentWave;
+        public int CurrentWave
+        {
+            get { return _currentWave; }
+            set
+            {
+                if (value != _currentWave)
+                {
+                    _currentWave = value;
+                    OnChange.Invoke();
+                }
+            }
+        }
+    }
+
     public static class FSMCommon
     {
         public const string IDLE_COMMAND = "idle";
@@ -24,18 +74,19 @@ namespace rqgames.GameEntities.Playable
     {
         public const string PlayerTag = "Player";
 
+        public PlayerScore CurrentScore;
+
         private rqgames.InputManagement.SwipeManager _input;
         private rqgames.Game.Game _game;
         private Rigidbody _body;
-
-
 
 
         protected FiniteStateMachine<FSMCommon.State> _fsm;
         private float _turretAngle;
 
         [SerializeField]
-        private rqgames.gameconfig.PlayerConfig _config;
+        private gameconfig.PlayerConfig _config;
+        public gameconfig.PlayerConfig Config { get { return _config; } }
         private Quaternion _initRotation;
 
         private int _lateralSign = 1;
@@ -90,16 +141,36 @@ namespace rqgames.GameEntities.Playable
 
         public void StartGame(rqgames.Game.Game game)
         {
+            CurrentScore = new PlayerScore();
+            CurrentScore.CurrentLife = _config.LifeCount;
+            CurrentScore.CurrentWave = 1;
+
             _game = game;
             gameObject.SetActive(true);
             transform.position = new Vector3(0, -_game.TopY + 4, 0);
         }
 
+        public void OnKillEnemy()
+        {
+            CurrentScore.CurrentScore++;
+        }
+
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.gameObject.layer == Init.GlobalVariables.EnemyLayer && other.tag == Weapon.WeaponTag)
+            {
+                CurrentScore.CurrentLife--;
+            }
+            if (other.gameObject.tag == Game.Game.TeleportTag)
+            {
+                _game.TakeTeleport(this.gameObject, other.gameObject);
+            }
+        }
 
         private void Update()
         {
             TurretFollowMouseDirection();
-            IdleCheck();
+            FSMIdleCheck();
         }
 
         private void TurretFollowMouseDirection()
@@ -122,7 +193,7 @@ namespace rqgames.GameEntities.Playable
             _fsm.IssueCommand(FSMCommon.MOVE_COMMAND);
         }
 
-        private void IdleCheck()
+        private void FSMIdleCheck()
         {
             bool check = false;
 
@@ -135,9 +206,9 @@ namespace rqgames.GameEntities.Playable
             {
                 _fsm.IssueCommand(FSMCommon.IDLE_COMMAND);
             }
-
         }
 
+     
         private void Fire()
         {
             _body.velocity = Vector3.zero;
