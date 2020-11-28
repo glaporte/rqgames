@@ -16,5 +16,5 @@ MonoBehaviour:
   LateralSpeed: 8
   InvulnerabilityTime: 2
   MoveTime: 0.268
-  AttackTime: 0.2
+  AttackTime: 0.12
   ProjectileSpeed: 3

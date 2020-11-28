@@ -23,12 +23,58 @@ namespace rqgames.Game
 
         public class Wave
         {
+            private Game _game;
+            public Wave(Game game)
+            {
+                _game = game;
+            }
             public List<GameObject> npcs = new List<GameObject>();
             public int Depth;
+            public int TargetDepth;
+
             public int Killed = 0;
             public int XCell = 0;
             public int RowsSideSign = 1;
             public bool HasChangedSign = false;
+            public int MoveCount { get; internal set; }
+
+            private float _moveTime;
+
+            public void Update(float dt)
+            {
+                if (Depth != TargetDepth)
+                {
+                    _moveTime += dt;
+                    _moveTime = Mathf.Min(MovementData.npcMoveTime, _moveTime);
+                    for (int i = 0; i < npcs.Count; i++)
+                    {
+                        Vector3 targetPos = npcs[i].transform.position;
+                        targetPos.y = _game.StartY - (MovementData.yOffsetNPC) * (Depth + 1);
+                        npcs[i].transform.position = Vector3.Lerp(npcs[i].transform.position,
+                            targetPos, _moveTime / MovementData.npcMoveTime);
+                    }
+                    if (_moveTime >= MovementData.npcMoveTime)
+                    {
+                        _moveTime = 0;
+                        MoveCount++;
+                        Depth++;
+                        CheckOut();
+                    }
+                }
+            }
+
+            private void CheckOut()
+            {
+                if (Depth > GlobalVariables.GameConfig.NpcRows)
+                {
+                    int count = npcs.Count;
+                    for (int j = 0; j < count; j++)
+                    {
+                        GameObject go = npcs[0]; // OnDie will remove it from container
+                        go.GetComponent<rqgames.GameEntities.NPCs.NPC>().OnDie(false);
+                    }
+                }
+            }
         }
 
         public const string TeleportTag = "Teleport";
@@ -69,16 +115,25 @@ namespace rqgames.Game
 
             for (int i = 0; i < Init.GlobalVariables.GameConfig.NpcRows; i++)
             {
-                Wave row = new Wave();
-                row.Depth = i;
+                Wave row = new Wave(this);
                 row.RowsSideSign = i % 2 == 1 ? -1 : 1;
+                row.Depth = i; row.TargetDepth = i;
                 NPCs.Add(row);
                 CreateRow(startY, row);
                 startY -= MovementData.yOffsetNPC;
             }
 
-            InvokeRepeating(nameof(MoveRows), Init.GlobalVariables.GameConfig.SwapNPCTick,
+            InvokeRepeating(nameof(MovementRowsX), Init.GlobalVariables.GameConfig.SwapNPCTick,
                 Init.GlobalVariables.GameConfig.SwapNPCTick + GlobalMoveXTime);
+            InvokeRepeating(nameof(CheckAddDepth), 0, MovementData.npcMoveTime * 1.5f);
+        }
+
+        private void CheckAddDepth()
+        {
+            if (NPCs[0].Depth > 0)
+                AppendWave();
+            if (NPCs.Count < Init.GlobalVariables.GameConfig.NpcRows)
+                NPCs.ForEach(w => { w.TargetDepth++; });
         }
 
         private void CreateRow(int startY, Wave row)
@@ -103,22 +158,7 @@ namespace rqgames.Game
         {
             wave.npcs.Remove(npc.gameObject);
             if (wave.npcs.Count == 0)
-            {
-                if (wave.Killed == GlobalVariables.GameConfig.NpcCols)
-                    PooledGameData.Player.CurrentScore.CurrentWave++;
                 NPCs.Remove(wave);
-                if (wave.Depth <= GlobalVariables.GameConfig.NpcRows)
-                {
-                    StartCoroutine(MoveForwardCondition(wave.Depth));
-                }
-            }
-        }
-
-        private IEnumerator MoveForwardCondition(int depth)
-        {
-            while (_moveData.MoveY)
-                yield return null;
-            MoveForward(depth);
         }
 
         public float GlobalMoveYTime(int depth) => depth * MovementData.npcMoveTime + MovementData.npcMoveTime * 2;
@@ -126,49 +166,28 @@ namespace rqgames.Game
         public float GlobalMoveXTime => (GlobalVariables.GameConfig.NpcRows) * MovementData.MoveXRowWait +
             (GlobalVariables.GameConfig.NpcCols - 1) * MovementData.npcMoveTime * MovementData.waitBeforeMoveNextNpc + MovementData.npcMoveTime * 2;
 
-        private void MoveForward(int startDepth)
+        private void Update()
         {
-            _moveData.MoveY = true;
-            for (int i = NPCs.Count - 1; i >= 0; i--)
-            {
-                if (NPCs[i].Depth >= startDepth)
-                    continue;
-                NPCs[i].Depth++;
-                if (NPCs[i].Depth > GlobalVariables.GameConfig.NpcRows)
-                {
-                    int count = NPCs[i].npcs.Count;
-                    for (int j = 0; j < count; j++)
-                    {
-                        GameObject go = NPCs[i].npcs[0]; // OnDie will remove it from container
-                        go.GetComponent<rqgames.GameEntities.NPCs.NPC>().OnDie(false);
-                    }
-                    continue;
-                }
-
-                List<GameObject> curRow = NPCs[i].npcs;
-                StartCoroutine(MoveRow(curRow, NPCs.Count - i - 1, 0, 1));
-            }
-            Invoke(nameof(CreateNewRow), GlobalMoveYTime(startDepth));
-            Invoke(nameof(ResetMoveY), GlobalMoveYTime(startDepth));
+            for (int i = 0; i < NPCs.Count; i++)
+                NPCs[i].Update(Time.deltaTime);
         }
-        
 
-        private void CreateNewRow()
+        private void AppendWave()
         {
-            Wave row = new Wave();
-            row.Depth = 0;
+            PooledGameData.Player.CurrentScore.CurrentWave++;
+            Wave row = new Wave(this);
             if (NPCs.Count > 0)
                 row.RowsSideSign = -NPCs[0].RowsSideSign;
             NPCs.Insert(0, row);
             CreateRow(StartY, row);
         }
 
-        private void MoveRows()
+        private void MovementRowsX()
         {
             if (_moveData.CountPassXMove > 0 && _moveData.CountPassXMove % 4 == 0)
             {
                 _moveData.CountPassXMove++;
-                StartCoroutine(MoveForwardCondition(GlobalVariables.GameConfig.NpcRows));
+                NPCs.ForEach(w => w.TargetDepth++);
                 return;
             }
             _moveData.CountPassXMove++;
@@ -185,47 +204,35 @@ namespace rqgames.Game
                 int sign = NPCs[i].RowsSideSign;
                 NPCs[i].XCell += NPCs[i].RowsSideSign;
 
-                List<GameObject> curRow = new List<GameObject>(NPCs[i].npcs);
-                if (sign < 0)
-                    curRow.Reverse();
-                StartCoroutine(MoveRow(curRow, i, sign));
+
+                StartCoroutine(MovementRowX(NPCs[i], i, sign));
             }
         }
 
-        private void ResetMoveY()
+        private IEnumerator MovementRowX(Wave wave, int listIndex, int sign)
         {
-            _moveData.MoveY = false;
-        }
-
-        private IEnumerator MoveRow(List<GameObject> npcs, int listIndex, int sign, int ySign = 0)
-        {
-            if (ySign != 0)
-                yield return new WaitForSeconds(listIndex * MovementData.npcMoveTime);
-            else
-                yield return new WaitForSeconds(listIndex * MovementData.MoveXRowWait);
-
-            for (int i = 0; i < npcs.Count; i++)
+            yield return new WaitForSeconds(listIndex * MovementData.MoveXRowWait);
+            List<GameObject> curRow = new List<GameObject>(wave.npcs);
+            if (sign < 0)
+                curRow.Reverse();
+            for (int i = 0; i < curRow.Count; i++)
             {
-                GameObject npc = npcs[i];
-                StartCoroutine(MoveNpc(npc, npc.transform.position
+                GameObject npc = curRow[i];
+                StartCoroutine(MovementNpcX(wave, npc, npc.transform.position
                     + Vector3.right * sign * MovementData.xOffsetNPC
-                    + Vector3.down * ySign * MovementData.yOffsetNPC
-                    , i, new Vector2(sign, ySign)));
+                    , i, sign));
             }
         }
 
-        private IEnumerator MoveNpc(GameObject npc, Vector3 dstPos, int listIndex, Vector2 signs)
+        private IEnumerator MovementNpcX(Wave wave, GameObject npc, Vector3 dstPos, int listIndex, float sign)
         {
-            if (signs.x != 0)
-                yield return new WaitForSeconds(MovementData.npcMoveTime * listIndex * MovementData.waitBeforeMoveNextNpc);
+            yield return new WaitForSeconds(MovementData.npcMoveTime * listIndex * MovementData.waitBeforeMoveNextNpc);
 
             Vector3 startPos = npc.transform.position;
-            float sign = signs.x;
             GameEntities.NPCs.NPC npcC = npc.GetComponent<GameEntities.NPCs.NPC>();
             npcC.StartMove();
             float curTime = 0;
 
-            // Percent value
             float startMove = 0.5f; // percent value
             float endMove = 0.4f; // percent value
             float moveTime = 0;
@@ -234,40 +241,34 @@ namespace rqgames.Game
             while (curTime < MovementData.npcMoveTime)
             {
                 curTime += Time.deltaTime;
-                if (sign != 0)
-                    npcC.Rotate(curTime / MovementData.npcMoveTime * sign);
+                npcC.Rotate(curTime / MovementData.npcMoveTime * sign);
                 if (curTime >= startMove * MovementData.npcMoveTime)
                 {
                     moveTime += Time.deltaTime;
-                    npc.transform.position = Vector3.Lerp(startPos, ModifyPosAccordingSign(npc, dstPos, signs), moveTime / moveDuration);
+                    npc.transform.position = Vector3.Lerp(startPos, KeepCurrentY(npc, dstPos), moveTime / moveDuration);
                 }
-                yield return null;
+                yield return new WaitForEndOfFrame();
             }
             moveTime += Time.deltaTime;
             curTime = 0;
             while (curTime < MovementData.npcMoveTime)
             {
                 curTime += Time.deltaTime;
-                if (sign != 0)
-                    npcC.Rotate((1f - (curTime / MovementData.npcMoveTime)) * sign);
+                npcC.Rotate((1f - (curTime / MovementData.npcMoveTime)) * sign);
                 if (curTime <= endMove * MovementData.npcMoveTime)
                 {
                     moveTime += Time.deltaTime;
-                    npc.transform.position = Vector3.Lerp(startPos, ModifyPosAccordingSign(npc, dstPos, signs), moveTime / moveDuration);
+                    npc.transform.position = Vector3.Lerp(startPos, KeepCurrentY(npc, dstPos), moveTime / moveDuration);
                 }
-                yield return null;
+                yield return new WaitForEndOfFrame();
             }
-            npc.transform.position = dstPos;
 
             npcC.EndMove();
         }
 
-        private Vector3 ModifyPosAccordingSign(GameObject npc, Vector3 dstPos ,Vector2 signs)
+        private Vector3 KeepCurrentY(GameObject npc, Vector3 dstPos)
         {
-            if (signs.x == 0)
-                dstPos.x = npc.transform.position.x;
-            if (signs.y == 0)
-                dstPos.y = npc.transform.position.y;
+            dstPos.y = npc.transform.position.y;
             return dstPos;
         }
 

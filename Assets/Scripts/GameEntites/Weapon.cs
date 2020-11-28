@@ -28,6 +28,11 @@ namespace rqgames.GameEntities
             }
         }
 
+        private void Unused()
+        {
+            OnDie(false);
+        }
+
         public void Proc(Vector3 position, Vector3 velocity, int layer)
         {
             gameObject.layer = layer;
@@ -38,7 +43,7 @@ namespace rqgames.GameEntities
             inverseVel *= -1;
             transform.rotation = Quaternion.LookRotation(inverseVel);
             
-            Invoke(nameof(OnDie), 15);
+            Invoke(nameof(Unused), 15);
         }
     }
 }
