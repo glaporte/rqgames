@@ -111,7 +111,7 @@ namespace rqgames.GameEntities.Playable
             Array.Sort(scoresObj.Scores, new PlayerScoreComparer());
             for (int i = 0; i < scoresObj.Scores.Length; i++)
             {
-                if (scoresObj.Scores != null)
+                if (scoresObj.Scores[i] != null)
                     scoresObj.Scores[i].Rank = i + 1;
             }
 

@@ -34,7 +34,7 @@ namespace rqgames.Score
 
             string rank = "too bad";
             if (score.Rank > 0)
-                rank = (score.Rank + 1).ToString();
+                rank = score.Rank.ToString();
             _rank.text = $"Your rank for this game is <B>{rank}</B>";
 
         }
