@@ -2,15 +2,41 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System;
+using System.Linq;
+
 using UnityEngine.Events;
+using UnityEngine.SceneManagement;
+using System.Collections;
 
 namespace rqgames.GameEntities.Playable
 {
     [Serializable()]
+    public class GameScore
+    {
+        public const int MAX_SCORE = 10;
+        public PlayerScore[] Scores;
+        public PlayerScore Last;
+    }
+
+    public class PlayerScoreComparer : IComparer
+    {
+        public int Compare(object x, object y)
+        {
+            int scoreX = ((PlayerScore)x) != null ? ((PlayerScore)x).CurrentScore : -1;
+            int scoreY = ((PlayerScore)y) != null ? ((PlayerScore)y).CurrentScore : -1;
+            return scoreY.CompareTo(scoreX);
+        }
+    }
+
+     [Serializable()]
     public class PlayerScore
     {
+        [NonSerialized]
         public UnityEvent OnChange = new UnityEvent();
-        
+
+        public float TimeElapsed;
+
+        [SerializeField]
         private int _currentScore;
         public int CurrentScore
         {
@@ -25,6 +51,7 @@ namespace rqgames.GameEntities.Playable
             }
         }
 
+        [SerializeField]
         private int _currentLife;
         public int CurrentLife
         {
@@ -39,6 +66,7 @@ namespace rqgames.GameEntities.Playable
             }
         }
 
+        [SerializeField]
         private int _currentWave;
         public int CurrentWave
         {
@@ -51,6 +79,44 @@ namespace rqgames.GameEntities.Playable
                     OnChange.Invoke();
                 }
             }
+        }
+
+        public int Rank;
+
+        public void Save(float gameTime)
+        {
+            string raw = PlayerPrefs.GetString("scores", string.Empty);
+            GameScore scoresObj = null;
+            try
+            {
+                scoresObj = JsonUtility.FromJson<GameScore>(raw);
+            }
+            catch (Exception) { }
+
+            if (scoresObj == null || scoresObj.Scores == null)
+                scoresObj = new GameScore() { Scores = new PlayerScore[GameScore.MAX_SCORE] };
+
+            int putIdx = Array.IndexOf(scoresObj.Scores, null);
+            if (putIdx == -1)
+            {
+                int min = scoresObj.Scores.Min(x => x.CurrentScore);
+                if (CurrentScore > min)
+                    putIdx = Array.IndexOf(scoresObj.Scores, scoresObj.Scores.First(x => x.CurrentScore == min));
+            }
+            TimeElapsed = gameTime;
+            scoresObj.Last = this;
+            if (putIdx > -1)
+                scoresObj.Scores[putIdx] = this;
+
+            Array.Sort(scoresObj.Scores, new PlayerScoreComparer());
+            for (int i = 0; i < scoresObj.Scores.Length; i++)
+            {
+                if (scoresObj.Scores != null)
+                    scoresObj.Scores[i].Rank = i + 1;
+            }
+
+            string json = JsonUtility.ToJson(scoresObj);
+            PlayerPrefs.SetString("scores", json);
         }
     }
 
@@ -136,7 +202,6 @@ namespace rqgames.GameEntities.Playable
         {
             DelayTransition delayTransition = new DelayTransition(from, to, duration);
             _fsm.AddTransition(from, to, command);
-
         }
 
         public void StartGame(rqgames.Game.Game game)
@@ -160,11 +225,19 @@ namespace rqgames.GameEntities.Playable
             if (other.gameObject.layer == Init.GlobalVariables.EnemyLayer && other.tag == Weapon.WeaponTag)
             {
                 CurrentScore.CurrentLife--;
+                if (CurrentScore.CurrentLife == -1)
+                    OnDie();
             }
             if (other.gameObject.tag == Game.Game.TeleportTag)
             {
                 _game.TakeTeleport(this.gameObject, other.gameObject);
             }
+        }
+
+        private void OnDie()
+        {
+            CurrentScore.Save(Time.timeSinceLevelLoad);
+            SceneManager.LoadScene("ScoreScene", LoadSceneMode.Single);
         }
 
         private void Update()

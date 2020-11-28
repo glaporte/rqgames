@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 
 namespace rqgames.Game
 {
@@ -10,7 +11,8 @@ namespace rqgames.Game
         private TMPro.TextMeshProUGUI _score;
         [SerializeField]
         private TMPro.TextMeshProUGUI _life;
-
+        [SerializeField]
+        private TMPro.TextMeshProUGUI _time;
         private Game _game;
 
         private void Start()
@@ -22,6 +24,17 @@ namespace rqgames.Game
             _game = g;
             rqgames.Init.PooledGameData.Player.CurrentScore.OnChange.AddListener(RefreshUI);
             RefreshUI();
+            InvokeRepeating(nameof(RefreshTime), 0, 1);
+        }
+
+        private void RefreshTime()
+        {
+            TimeSpan t = TimeSpan.FromSeconds(Time.timeSinceLevelLoad);
+            string time = string.Format("{0}s", t.Seconds);
+            if (t.Minutes > 0)
+                time = string.Format("{0}m and " + time, t.Minutes);
+
+            _time.text = $"TIME <B>{time}</B>";
         }
 
         private void RefreshUI()

@@ -6,6 +6,8 @@ namespace rqgames.MainMenu
 { 
     public class MainMenuScene : MonoBehaviour
     {
+        public const string SceneName = "MainMenuScene";
+
         [SerializeField]
         private Button _startButton;
         [SerializeField]
@@ -19,7 +21,7 @@ namespace rqgames.MainMenu
 
         private void StartGame()
         {
-            SceneManager.LoadScene("GameScene", LoadSceneMode.Single);
+            SceneManager.LoadScene(Game.Game.SceneName, LoadSceneMode.Single);
         }
 
         private void HighScore()

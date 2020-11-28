@@ -55,6 +55,11 @@ namespace rqgames.Init
             GlobalVariables.GameConfig = _gameConfig;
         }
 
+        private void OnApplicationQuit()
+        {
+            PlayerPrefs.Save();
+        }
+
         private void Start()
         {
             PooledGameData.NPCs = new List<Stack<GameObject>>();
@@ -123,7 +128,7 @@ namespace rqgames.Init
 
         private void LoadingGameData_Completed(AsyncOperationHandle<IList<GameObject>> obj)
         {
-            SceneManager.LoadScene("MainMenuScene", LoadSceneMode.Single);
+            SceneManager.LoadScene(MainMenu.MainMenuScene.SceneName, LoadSceneMode.Single);
         }
     }
 }

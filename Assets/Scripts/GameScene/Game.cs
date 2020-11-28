@@ -7,6 +7,8 @@ namespace rqgames.Game
 {
     public class Game : MonoBehaviour
     {
+        public const string SceneName = "GameScene";
+
         public class MovementData
         {
             public int CountPassXMove = 0;
