@@ -85,17 +85,7 @@ namespace rqgames.GameEntities.Playable
 
         public void Save(float gameTime)
         {
-            string raw = PlayerPrefs.GetString("scores", string.Empty);
-            GameScore scoresObj = null;
-            try
-            {
-                scoresObj = JsonUtility.FromJson<GameScore>(raw);
-            }
-            catch (Exception) { }
-
-            if (scoresObj == null || scoresObj.Scores == null)
-                scoresObj = new GameScore() { Scores = new PlayerScore[GameScore.MAX_SCORE] };
-
+            GameScore scoresObj = Init.GlobalVariables.Scores;
             int putIdx = Array.IndexOf(scoresObj.Scores, null);
             if (putIdx == -1)
             {
@@ -159,6 +149,20 @@ namespace rqgames.GameEntities.Playable
 
         private Dictionary<FSMCommon.State, float> PlayerStateEnterTime;
 
+        private bool _invulnerable = false;
+        public bool Invulnerable
+        {
+            get { return _invulnerable; }
+            set
+            {
+                _invulnerable = value;
+                if (value)
+                    GetComponent<Renderer>().material.color = Color.red;
+                else
+                    GetComponent<Renderer>().material.color = Color.white;
+            }
+        }
+
         private void Start()
         {
             _initRotation = this.transform.rotation;
@@ -210,6 +214,8 @@ namespace rqgames.GameEntities.Playable
             CurrentScore.CurrentLife = _config.LifeCount;
             CurrentScore.CurrentWave = 1;
 
+            Invulnerable = false;
+            
             _game = game;
             gameObject.SetActive(true);
             transform.position = new Vector3(0, -_game.TopY + 4, 0);
@@ -222,9 +228,14 @@ namespace rqgames.GameEntities.Playable
 
         private void OnTriggerEnter(Collider other)
         {
-            if (other.gameObject.layer == Init.GlobalVariables.EnemyLayer && other.tag == Weapon.WeaponTag)
+            if (other.gameObject.layer == Init.GlobalVariables.EnemyLayer
+                && other.tag == Weapon.WeaponTag
+                && !Invulnerable)
             {
                 CurrentScore.CurrentLife--;
+
+                Invulnerable = true;
+                Invoke(nameof(CancelInvulnerable), _config.InvulnerabilityTime);
                 if (CurrentScore.CurrentLife == -1)
                     OnDie();
             }
@@ -234,11 +245,16 @@ namespace rqgames.GameEntities.Playable
             }
         }
 
+        private void CancelInvulnerable()
+        {
+            Invulnerable = false;
+        }
+
         private void OnDie()
         {
             _game.Finish();
             CurrentScore.Save(Time.timeSinceLevelLoad);
-            SceneManager.LoadScene("ScoreScene", LoadSceneMode.Single);
+            SceneManager.LoadScene(Score.ScoreScene.SceneName, LoadSceneMode.Single);
         }
 
         private void Update()

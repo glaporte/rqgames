@@ -15,10 +15,6 @@ namespace rqgames.Game
         private TMPro.TextMeshProUGUI _time;
         private Game _game;
 
-        private void Start()
-        {
-        }
-
         public void Init(Game g)
         {
             _game = g;

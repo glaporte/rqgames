@@ -8,6 +8,8 @@ namespace rqgames.Score
 {
     public class ScoreScene : MonoBehaviour
     {
+        public const string SceneName = "ScoreScene";
+
         [SerializeField]
         private TMPro.TextMeshProUGUI _rank;
 
@@ -32,11 +34,10 @@ namespace rqgames.Score
 
             _score.text = $"<B>{time}</B> of survival with <B>{score.CurrentWave}</b> waves and <B>{score.CurrentScore}</B> enemies killed.";
 
-            string rank = "too bad";
+            string rank = "too bad to be displayed.";
             if (score.Rank > 0)
                 rank = score.Rank.ToString();
             _rank.text = $"Your rank for this game is <B>{rank}</B>";
-
         }
     }
 }

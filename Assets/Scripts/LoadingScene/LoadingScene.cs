@@ -5,6 +5,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.SceneManagement;
 using rqgames.GameEntities;
+using System;
 
 namespace rqgames.Init
 {
@@ -14,6 +15,8 @@ namespace rqgames.Init
 
         public static readonly int AllyLayer = LayerMask.NameToLayer("Ally");
         public static readonly int EnemyLayer = LayerMask.NameToLayer("Enemy");
+
+        public static GameEntities.Playable.GameScore Scores;
     }
 
     public static class LoadedGameData
@@ -46,7 +49,13 @@ namespace rqgames.Init
         {
             if (Weapons.Count == 0)
                 return;
+
             GameObject weapon = Weapons.Pop();
+            if (layer == GlobalVariables.AllyLayer)
+                weapon.GetComponent<Renderer>().material.color = Color.magenta;
+            else
+                weapon.GetComponent<Renderer>().material.color = Color.red;
+
             weapon.SetActive(true);
             UsedWeapons.Add(weapon);
             weapon.GetComponent<Weapon>().Proc(position, velocity, layer);
@@ -65,6 +74,22 @@ namespace rqgames.Init
         {
             DontDestroyOnLoad(this.gameObject);
             GlobalVariables.GameConfig = _gameConfig;
+
+            string raw = PlayerPrefs.GetString("scores", string.Empty);
+            try
+            {
+                GlobalVariables.Scores = JsonUtility.FromJson<GameEntities.Playable.GameScore>(raw);
+            }
+            catch (Exception) { }
+
+            if (GlobalVariables.Scores == null || GlobalVariables.Scores.Scores == null)
+            {
+                GlobalVariables.Scores = new GameEntities.Playable.GameScore()
+                {
+                    Scores = new GameEntities.Playable.PlayerScore[GameEntities.Playable.GameScore.MAX_SCORE]
+                };
+            }
+
         }
 
         private void OnApplicationQuit()

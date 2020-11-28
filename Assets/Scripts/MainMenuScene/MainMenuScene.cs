@@ -12,11 +12,14 @@ namespace rqgames.MainMenu
         private Button _startButton;
         [SerializeField]
         private Button _highScoreButton;
+        [SerializeField]
+        private Button _quitButton;
 
         void Start()
         {
             _startButton.onClick.AddListener(() => StartGame());
             _highScoreButton.onClick.AddListener(() => HighScore());
+            _quitButton.onClick.AddListener(() => Application.Quit());
         }
 
         private void StartGame()
@@ -26,7 +29,7 @@ namespace rqgames.MainMenu
 
         private void HighScore()
         {
-
+            SceneManager.LoadScene(rqgames.Score.HighScoreScene.SceneName, LoadSceneMode.Single);
         }
     }
 }
