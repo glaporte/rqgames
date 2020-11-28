@@ -100,8 +100,6 @@ namespace rqgames.Game
             _moveData = new MovementData();
             float frustumHeight = 2.0f * 20 * Mathf.Tan(Camera.main.fieldOfView * 0.5f * Mathf.Deg2Rad);
             TopY = frustumHeight / 2;
-            //float _frustumWidth = (int)(frustumHeight * Camera.main.aspect);
-
 
             InitGrid();
             PooledGameData.Player.StartGame(this);
@@ -162,8 +160,6 @@ namespace rqgames.Game
             if (wave.npcs.Count == 0)
                 NPCs.Remove(wave);
         }
-
-        public float GlobalMoveYTime(int depth) => depth * MovementData.npcMoveTime + MovementData.npcMoveTime * 2;
 
         public float GlobalMoveXTime => (GlobalVariables.GameConfig.NpcRows) * MovementData.MoveXRowWait +
             (GlobalVariables.GameConfig.NpcCols - 1) * MovementData.npcMoveTime * MovementData.waitBeforeMoveNextNpc + MovementData.npcMoveTime * 2;
@@ -290,6 +286,23 @@ namespace rqgames.Game
         {
             src.transform.position = teleport.transform == _teleportLeft
                 ? _teleportRight.transform.GetChild(0).position :_teleportLeft.transform.GetChild(0).position;
+        }
+
+        public void Finish()
+        {
+            CancelInvoke();
+            int waveCount = NPCs.Count;
+            for (int i = 0; i < waveCount; i++)
+            {
+                Wave w = NPCs[0];
+                int count = w.npcs.Count;
+                for (int j = 0; j < count; j++)
+                {
+                    GameObject go = w.npcs[0]; // OnDie will remove it from container
+                    go.GetComponent<rqgames.GameEntities.NPCs.NPC>().OnDie(false);
+                }
+            }
+            PooledGameData.Finish();
         }
     }
 }

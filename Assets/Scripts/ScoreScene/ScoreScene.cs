@@ -1,5 +1,8 @@
 ﻿using System;
+using rqgames.MainMenu;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 namespace rqgames.Score
 {
@@ -11,10 +14,16 @@ namespace rqgames.Score
         [SerializeField]
         private TMPro.TextMeshProUGUI _score;
 
-        
+        [SerializeField]
+        private Button _playAgain;
+        [SerializeField]
+        private Button _menu;
 
         private void Start()
         {
+            _playAgain.onClick.AddListener(() => { SceneManager.LoadScene(Game.Game.SceneName, LoadSceneMode.Single); });
+            _menu.onClick.AddListener(() => { SceneManager.LoadScene(MainMenuScene.SceneName, LoadSceneMode.Single); });
+
             GameEntities.Playable.PlayerScore score = rqgames.Init.PooledGameData.Player.CurrentScore;
             TimeSpan t = TimeSpan.FromSeconds(score.TimeElapsed);
             string time = string.Format("{0}s", t.Seconds);

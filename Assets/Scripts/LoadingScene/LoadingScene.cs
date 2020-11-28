@@ -30,6 +30,17 @@ namespace rqgames.Init
         public static rqgames.GameEntities.Playable.Player Player;
         public static List<Stack<GameObject>> NPCs;
         public static Stack<GameObject> Weapons;
+        public static List<GameObject> UsedWeapons;
+
+        public static void Finish()
+        {
+            while (UsedWeapons.Count > 0)
+            {
+                UsedWeapons[0].SetActive(false);
+                Weapons.Push(UsedWeapons[0]);
+                UsedWeapons.RemoveAt(0);
+            }
+        }
 
         public static void PopWeapon(Vector3 position, Vector3 velocity, int layer)
         {
@@ -37,6 +48,7 @@ namespace rqgames.Init
                 return;
             GameObject weapon = Weapons.Pop();
             weapon.SetActive(true);
+            UsedWeapons.Add(weapon);
             weapon.GetComponent<Weapon>().Proc(position, velocity, layer);
         }
     }
@@ -68,6 +80,7 @@ namespace rqgames.Init
             PooledGameData.NPCs.Add(new Stack<GameObject>());
 
             PooledGameData.Weapons = new Stack<GameObject>();
+            PooledGameData.UsedWeapons = new List<GameObject>();
             Addressables.LoadAssetsAsync<GameObject>(_assetLabelReference, LoadCallback).Completed += LoadingGameData_Completed;
         }
 

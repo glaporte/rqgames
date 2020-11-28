@@ -236,6 +236,7 @@ namespace rqgames.GameEntities.Playable
 
         private void OnDie()
         {
+            _game.Finish();
             CurrentScore.Save(Time.timeSinceLevelLoad);
             SceneManager.LoadScene("ScoreScene", LoadSceneMode.Single);
         }

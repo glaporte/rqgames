@@ -9,14 +9,11 @@ namespace rqgames.GameEntities
 
         public Stack<GameObject> DataContainer { get; set; }
 
-        private void Start()
-        {
-        }
-
         public void OnDie(bool byAlly)
         {
             CancelInvoke();
             gameObject.SetActive(false);
+            rqgames.Init.PooledGameData.UsedWeapons.Remove(this.gameObject);
             DataContainer.Push(this.gameObject);
         }
 
