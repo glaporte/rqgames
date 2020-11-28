@@ -51,6 +51,7 @@ namespace rqgames.GameEntities.NPCs
             _fsm.OnEnter(Playable.FSMCommon.State.Attack, Fire);
             _fsm.OnExit(Playable.FSMCommon.State.Idle, () => { RotationOnLostIdle = transform.rotation; });
             _fsm.Begin(Playable.FSMCommon.State.Idle);
+
             InitNPC();
         }
 
@@ -63,6 +64,10 @@ namespace rqgames.GameEntities.NPCs
             _game = game;
             _startY = startY;
             _gameContainer = row;
+            _timerAttack = 0;
+
+            if (_fsm != null)
+                _fsm.IssueCommand(Playable.FSMCommon.IDLE_COMMAND);
         }
 
         private void Update()
