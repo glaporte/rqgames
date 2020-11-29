@@ -5,9 +5,11 @@ namespace rqgames.gameconfig
     [CreateAssetMenu]
     public class PlayerConfig : ScriptableObject
     {
+        [Range(3, 5)]
         public int LifeCount = 3;
         [Range(4, 8)]
         public float LateralSpeed = 6;
+        [Range(2, 3)]
         public float InvulnerabilityTime = 2;
 
         [Range(0.1f, 0.3f)]

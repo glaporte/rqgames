@@ -26,8 +26,6 @@ namespace rqgames.GameEntities.NPCs
 
         private float _timerAttack;
 
-        private int _difficulty = 150; // if _countAttack is max (10), each second attack has _countAttack / _difficulty chance to proc.
-
         public Stack<GameObject> DataContainer { get; set; }
         private rqgames.Game.Game _game;
         private Game.Game.Wave _gameContainer;
@@ -76,7 +74,7 @@ namespace rqgames.GameEntities.NPCs
             _timerAttack += Time.deltaTime;
             if (_timerAttack > 1)
             {
-                if (UnityEngine.Random.Range(0, 1f) < _countAttack / _difficulty)
+                if (Random.Range(0, 1f) < _countAttack / _game.Difficulty)
                     _fsm.IssueCommand(Playable.FSMCommon.ATTACK_COMMAND);
                 _timerAttack = 0;
             }
@@ -121,8 +119,6 @@ namespace rqgames.GameEntities.NPCs
         public void OnDie(bool byAlly)
         {
             transform.rotation = InitialRotation;
-            if (byAlly)
-                _gameContainer.Killed++;
             _game.NPCDie(this, _gameContainer);
             gameObject.SetActive(false);
             DataContainer.Push(this.gameObject);

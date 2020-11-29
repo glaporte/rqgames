@@ -17,17 +17,19 @@ namespace rqgames.gameconfig
         [Range(6, 8)]
         public int NpcCols = 6;
 
-        private int? _countNpc;
-        public int CountNpc => _countNpc ?? CountNpcCahe();
+        [Range(5, 15)]
+        public int ChangeDifficultyTime = 10;
 
         [Range(1, 4)]
         public float SwapNPCTick = 5;
 
-        public const int ExtraRows = 1;
+        private int? _countNpc;
+        public int CountNpc => _countNpc ?? CountNpcCahe();
+
 
         private int CountNpcCahe()
         {
-            _countNpc = (ExtraRows + NpcRows) * NpcCols; // extra rows
+            _countNpc = (1 + NpcRows) * NpcCols; // 1 extra row
             return _countNpc.Value;
         }
 
@@ -63,7 +65,7 @@ namespace rqgames.gameconfig
 
         private int CountMaxWeaponCache()
         {
-            _countMaxWeapon = CountNpc * 2 + 30;
+            _countMaxWeapon = CountNpc * 3 + 30;
             return _countMaxWeapon.Value;
         }
 

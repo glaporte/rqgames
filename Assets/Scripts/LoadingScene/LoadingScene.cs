@@ -48,7 +48,10 @@ namespace rqgames.Init
         public static void PopWeapon(Vector3 position, Vector3 velocity, int layer)
         {
             if (Weapons.Count == 0)
+            {
+                Debug.LogError("no more weapon.");
                 return;
+            }
 
             GameObject weapon = Weapons.Pop();
             if (layer == GlobalVariables.AllyLayer)

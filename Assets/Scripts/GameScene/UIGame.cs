@@ -1,5 +1,6 @@
 ﻿using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace rqgames.Game
 {
@@ -13,6 +14,11 @@ namespace rqgames.Game
         private TMPro.TextMeshProUGUI _life;
         [SerializeField]
         private TMPro.TextMeshProUGUI _time;
+        [SerializeField]
+        private TMPro.TextMeshProUGUI _difficultyLevel;
+        [SerializeField]
+        private Image _difficultyProgress;
+
         private Game _game;
 
         public void Init(Game g)
@@ -31,6 +37,13 @@ namespace rqgames.Game
                 time = string.Format("{0}m and " + time, t.Minutes);
 
             _time.text = $"TIME <B>{time}</B>";
+        }
+
+        public void RefreshDifficulty()
+        {
+            _difficultyLevel.text = $"DIFFICULTY {_game.FancyDifficulty}";
+            if (_game.FancyDifficulty == Game.MaxDifficultyLevel)
+                _difficultyProgress.enabled = false;
         }
 
         private void RefreshUI()
@@ -57,7 +70,7 @@ namespace rqgames.Game
 
         private void Update()
         {
-        
+            _difficultyProgress.fillAmount = 1F - (_game.TimerDifficulty / rqgames.Init.GlobalVariables.GameConfig.ChangeDifficultyTime);
         }
     }
 }

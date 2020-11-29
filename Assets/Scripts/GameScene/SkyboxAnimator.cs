@@ -1,18 +1,21 @@
 ﻿using UnityEngine;
 
-[RequireComponent(typeof(SkyboxAnimator))]
-public class SkyboxAnimator : MonoBehaviour
+namespace rqgames.Game
 {
-    private Skybox _sky;
-    private Material _mat;
-    private void Start()
+    [RequireComponent(typeof(Skybox))]
+    public class SkyboxAnimator : MonoBehaviour
     {
-        _sky = GetComponent<Skybox>();
-        _mat = _sky.material;
-    }
+        private Skybox _sky;
+        private Material _mat;
+        private void Start()
+        {
+            _sky = GetComponent<Skybox>();
+            _mat = _sky.material;
+        }
 
-    private void Update()
-    {
-        _mat.SetFloat("_Rotation", Time.timeSinceLevelLoad * 10);
+        private void Update()
+        {
+            _mat.SetFloat("_Rotation", Time.timeSinceLevelLoad * 10);
+        }
     }
 }

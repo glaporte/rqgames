@@ -12,7 +12,6 @@ namespace rqgames.Game
         public class MovementData
         {
             public int CountPassXMove = 0;
-            public bool MoveY;
 
             public const int xOffsetNPC = 3;
             public const int yOffsetNPC = 3;
@@ -34,11 +33,9 @@ namespace rqgames.Game
             public int Depth;
             public int TargetDepth;
 
-            public int Killed = 0;
             public int XCell = 0;
             public int RowsSideSign = 1;
             public bool HasChangedSign = false;
-            public int MoveCount { get; internal set; }
 
             private float _moveTime;
 
@@ -58,7 +55,6 @@ namespace rqgames.Game
                     if (_moveTime >= MovementData.npcMoveTime)
                     {
                         _moveTime = 0;
-                        MoveCount++;
                         Depth++;
                         CheckOut();
                     }
@@ -90,9 +86,19 @@ namespace rqgames.Game
 
         private MovementData _moveData;
 
-
         private List<Wave> NPCs;
+
+        private int StartX => -(Init.GlobalVariables.GameConfig.NpcCols * MovementData.xOffsetNPC) / 2;
+        private int StartY => (int)(TopY - 2);
+
         public float TopY { get; internal set; }
+        public float GlobalMoveXTime => (GlobalVariables.GameConfig.NpcRows) * MovementData.MoveXRowWait +
+            (GlobalVariables.GameConfig.NpcCols - 1) * MovementData.npcMoveTime * MovementData.waitBeforeMoveNextNpc + MovementData.npcMoveTime * 2;
+
+        public int Difficulty { get; internal set; } = 100; // if _countAttack is max (10), each second attack has _countAttack / _difficulty chance to proc.
+        public int FancyDifficulty { get; internal set; } = 1;
+        public const int MaxDifficultyLevel = 10;
+        public float TimerDifficulty { get; internal set; }
 
         private void Start()
         {
@@ -105,9 +111,6 @@ namespace rqgames.Game
             PooledGameData.Player.StartGame(this);
             _ui.Init(this);
         }
-
-        private int StartX => -(Init.GlobalVariables.GameConfig.NpcCols * MovementData.xOffsetNPC) / 2;
-        private int StartY => (int)(TopY - 2);
 
         private void InitGrid()
         {
@@ -124,7 +127,7 @@ namespace rqgames.Game
             }
 
             InvokeRepeating(nameof(MovementRowsX), Init.GlobalVariables.GameConfig.SwapNPCTick,
-                Init.GlobalVariables.GameConfig.SwapNPCTick + GlobalMoveXTime);
+                GlobalVariables.GameConfig.SwapNPCTick + GlobalMoveXTime);
             InvokeRepeating(nameof(CheckAddDepth), 0, MovementData.npcMoveTime * 1.5f);
         }
 
@@ -140,7 +143,7 @@ namespace rqgames.Game
         {
             int curX = StartX;
 
-            for (int j = 0; j < Init.GlobalVariables.GameConfig.NpcCols; j++)
+            for (int j = 0; j < GlobalVariables.GameConfig.NpcCols; j++)
             {
                 Stack<GameObject> container = GetNPCContainer();
                 if (container == null)
@@ -161,13 +164,26 @@ namespace rqgames.Game
                 NPCs.Remove(wave);
         }
 
-        public float GlobalMoveXTime => (GlobalVariables.GameConfig.NpcRows) * MovementData.MoveXRowWait +
-            (GlobalVariables.GameConfig.NpcCols - 1) * MovementData.npcMoveTime * MovementData.waitBeforeMoveNextNpc + MovementData.npcMoveTime * 2;
-
         private void Update()
         {
             for (int i = 0; i < NPCs.Count; i++)
                 NPCs[i].Update(Time.deltaTime);
+
+            if (Difficulty > 10)
+            {
+                TimerDifficulty += Time.deltaTime;
+                if (TimerDifficulty > GlobalVariables.GameConfig.ChangeDifficultyTime)
+                {
+                    TimerDifficulty = 0;
+                    FancyDifficulty++;
+                    if (Difficulty > 20)
+                        Difficulty -= 20;
+                    else
+                        Difficulty -= 2;
+                    _ui.RefreshDifficulty();
+                }
+            }
+
         }
 
         private void AppendWave()
