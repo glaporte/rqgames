@@ -44,20 +44,24 @@ namespace rqgames.Game
                 if (Depth != TargetDepth)
                 {
                     _moveTime += dt;
-                    _moveTime = Mathf.Min(MovementData.npcMoveTime, _moveTime);
-                    for (int i = 0; i < npcs.Count; i++)
-                    {
-                        Vector3 targetPos = npcs[i].transform.position;
-                        targetPos.y = _game.StartY - (MovementData.yOffsetNPC) * (Depth + 1);
-                        npcs[i].transform.position = Vector3.Lerp(npcs[i].transform.position,
-                            targetPos, _moveTime / MovementData.npcMoveTime);
-                    }
+                    SetNPCsY(_moveTime / MovementData.npcMoveTime);
                     if (_moveTime >= MovementData.npcMoveTime)
                     {
+                        SetNPCsY(1);
                         _moveTime = 0;
                         Depth++;
                         CheckOut();
                     }
+                }
+            }
+
+            private void SetNPCsY(float percent)
+            {
+                for (int i = 0; i < npcs.Count; i++)
+                {
+                    Vector3 targetPos = npcs[i].transform.position;
+                    targetPos.y = Mathf.Lerp(targetPos.y, _game.StartY - (MovementData.yOffsetNPC) * (Depth + 1), percent);
+                    npcs[i].transform.position = targetPos;
                 }
             }
 
@@ -292,13 +296,16 @@ namespace rqgames.Game
                 if (curTime >= startMove * MovementData.npcMoveTime && curTime <= endMove * MovementData.npcMoveTime)
                 {
                     moveTime += Time.deltaTime;
-                    dstPos.y = npc.transform.position.y;
-                    npc.transform.position = Vector3.Lerp(startPos, dstPos, moveTime / moveDuration);
+                    Vector3 tgtPos = dstPos;
+                    tgtPos.y = npc.transform.position.y;
+                    tgtPos.x = Mathf.Lerp(startPos.x, dstPos.x, moveTime / moveDuration);
+                    npc.transform.position = tgtPos;
                 }
                 yield return new WaitForEndOfFrame();
             }
-            dstPos.y = npc.transform.position.y;
-            npc.transform.position = dstPos;
+            Vector3 tgtPos2 = dstPos;
+            tgtPos2.y = npc.transform.position.y;
+            npc.transform.position = tgtPos2;
         }
 
         public void TakeTeleport(GameObject src, GameObject teleport)
