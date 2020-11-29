@@ -40,7 +40,7 @@ namespace rqgames.GameEntities
             inverseVel *= -1;
             transform.rotation = Quaternion.LookRotation(inverseVel);
             
-            Invoke(nameof(Unused), 15);
+            Invoke(nameof(Unused), 20);
         }
     }
 }

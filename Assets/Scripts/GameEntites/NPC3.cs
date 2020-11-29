@@ -38,9 +38,13 @@ namespace rqgames.GameEntities.NPCs
             Init.PooledGameData.PopWeapon(_target.position, vel, Init.GlobalVariables.EnemyLayer);
         }
 
-        override public void Rotate(float intensity)
+        override public void Rotate(float intensity, float oneWayIntensity)
         {
-            transform.localRotation = InitialRotation * Quaternion.Euler(0, 0, -intensity * 30);
+            float target = -RotationOnLostIdle.eulerAngles.z;
+            target += 180;
+            transform.rotation = Quaternion.Lerp(RotationOnLostIdle,
+                Quaternion.Euler(RotationOnLostIdle.eulerAngles.x, RotationOnLostIdle.eulerAngles.y, target),
+                oneWayIntensity);
         }
     }
 }

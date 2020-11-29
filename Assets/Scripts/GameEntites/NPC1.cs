@@ -23,7 +23,7 @@ namespace rqgames.GameEntities.NPCs
             }
         }
 
-        override public void Rotate(float intensity)
+        override public void Rotate(float intensity, float oneWayIntensity)
         {
             transform.localRotation = RotationOnLostIdle * Quaternion.Euler(0, intensity * 30, 0);
         }

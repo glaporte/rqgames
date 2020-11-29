@@ -18,7 +18,6 @@ namespace rqgames.GameEntities.NPCs
         protected Quaternion RotationOnLostIdle { get; set; }
 
         protected float _internalTimer = 0;
-        protected float _rndSmall;
         protected float _rndMedium;
 
         protected float _weaponSpeed;
@@ -34,8 +33,8 @@ namespace rqgames.GameEntities.NPCs
         private void Start()
         {
             _timerAttack = 0;
-            _rndMedium = UnityEngine.Random.Range(-15, 15);
-            _rndSmall = UnityEngine.Random.Range(-1f, 1f);
+            int rndSign = UnityEngine.Random.Range(0, 100) % 2 == 0 ? 1 : -1;
+            _rndMedium = UnityEngine.Random.Range(10f, 30f) * rndSign;
             InitialRotation = transform.rotation;
             _fsm = FiniteStateMachine<Playable.FSMCommon.State>.FromEnum();
             _fsm.AddTransition(Playable.FSMCommon.State.Idle, Playable.FSMCommon.State.Attack, Playable.FSMCommon.ATTACK_COMMAND);
@@ -46,7 +45,7 @@ namespace rqgames.GameEntities.NPCs
             _fsm.AddTransition(Playable.FSMCommon.State.Idle, Playable.FSMCommon.State.Move, Playable.FSMCommon.MOVE_COMMAND);
             _fsm.AddTransition(Playable.FSMCommon.State.Attack, Playable.FSMCommon.State.Move, Playable.FSMCommon.MOVE_COMMAND);
 
-            _fsm.OnEnter(Playable.FSMCommon.State.Attack, Fire);
+            _fsm.OnEnter(Playable.FSMCommon.State.Attack, () => { Invoke(nameof(BackToIdle), 0.3f); Fire(); });
             _fsm.OnExit(Playable.FSMCommon.State.Idle, () => { RotationOnLostIdle = transform.rotation; });
             _fsm.Begin(Playable.FSMCommon.State.Idle);
 
@@ -89,9 +88,9 @@ namespace rqgames.GameEntities.NPCs
             }
         }
 
-        virtual public void Rotate(float intensity)
+        virtual public void Rotate(float intensity, float oneWayIntensity)
         {
-            transform.localRotation = RotationOnLostIdle * Quaternion.Euler(0, 0, intensity * 30);
+            transform.rotation = RotationOnLostIdle * Quaternion.Euler(0, 0, intensity * 30);
         }
 
         public void StartMove()
@@ -112,7 +111,10 @@ namespace rqgames.GameEntities.NPCs
             Init.PooledGameData.PopWeapon(pos,
                 vel,
                 Init.GlobalVariables.EnemyLayer);
+        }
 
+        private void BackToIdle()
+        {
             _fsm.IssueCommand(Playable.FSMCommon.IDLE_COMMAND);
         }
 

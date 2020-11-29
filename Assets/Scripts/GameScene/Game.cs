@@ -157,6 +157,28 @@ namespace rqgames.Game
             }
         }
 
+        private Stack<GameObject> GetNPCContainer()
+        {
+            float ratio1 = PooledGameData.NPCs[0].Count > 0 ? Init.GlobalVariables.GameConfig.Npc1Ratio : 0;
+            float ratio2 = PooledGameData.NPCs[1].Count > 0 ? Init.GlobalVariables.GameConfig.Npc2Ratio : 0;
+            float ratio3 = PooledGameData.NPCs[2].Count > 0 ? Init.GlobalVariables.GameConfig.Npc3Ratio : 0;
+
+            int index = Utils.CommonUtils.GetRandomWeightedIndex(ratio1, ratio2, ratio3);
+            if (index == -1)
+                return null;
+            return PooledGameData.NPCs[index];
+        }
+
+        private void AppendWave()
+        {
+            PooledGameData.Player.CurrentScore.CurrentWave++;
+            Wave row = new Wave(this);
+            if (NPCs.Count > 0)
+                row.RowsSideSign = -NPCs[0].RowsSideSign;
+            NPCs.Insert(0, row);
+            CreateRow(StartY, row);
+        }
+
         public void NPCDie(GameEntities.NPCs.NPC npc, Wave wave)
         {
             wave.npcs.Remove(npc.gameObject);
@@ -184,16 +206,6 @@ namespace rqgames.Game
                 }
             }
 
-        }
-
-        private void AppendWave()
-        {
-            PooledGameData.Player.CurrentScore.CurrentWave++;
-            Wave row = new Wave(this);
-            if (NPCs.Count > 0)
-                row.RowsSideSign = -NPCs[0].RowsSideSign;
-            NPCs.Insert(0, row);
-            CreateRow(StartY, row);
         }
 
         private void MovementRowsX()
@@ -245,57 +257,48 @@ namespace rqgames.Game
             Vector3 startPos = npc.transform.position;
             GameEntities.NPCs.NPC npcC = npc.GetComponent<GameEntities.NPCs.NPC>();
             npcC.StartMove();
-            float curTime = 0;
 
             float startMove = 0.5f; // percent value
             float endMove = 0.4f; // percent value
-            float moveTime = 0;
             float moveDuration = (1f - startMove) * MovementData.npcMoveTime + endMove * MovementData.npcMoveTime;
 
-            while (curTime < MovementData.npcMoveTime)
-            {
-                curTime += Time.deltaTime;
-                npcC.Rotate(curTime / MovementData.npcMoveTime * sign);
-                if (curTime >= startMove * MovementData.npcMoveTime)
-                {
-                    moveTime += Time.deltaTime;
-                    npc.transform.position = Vector3.Lerp(startPos, KeepCurrentY(npc, dstPos), moveTime / moveDuration);
-                }
-                yield return new WaitForEndOfFrame();
-            }
-            moveTime += Time.deltaTime;
-            curTime = 0;
-            while (curTime < MovementData.npcMoveTime)
-            {
-                curTime += Time.deltaTime;
-                npcC.Rotate((1f - (curTime / MovementData.npcMoveTime)) * sign);
-                if (curTime <= endMove * MovementData.npcMoveTime)
-                {
-                    moveTime += Time.deltaTime;
-                    npc.transform.position = Vector3.Lerp(startPos, KeepCurrentY(npc, dstPos), moveTime / moveDuration);
-                }
-                yield return new WaitForEndOfFrame();
-            }
+            yield return StartCoroutine(OnWayMovementNpcX(npc, startPos, dstPos, sign, startMove, 1, 0, moveDuration, false));
+            yield return StartCoroutine(OnWayMovementNpcX(npc, startPos, dstPos, sign, -1, endMove,
+                (1f - startMove) * MovementData.npcMoveTime, moveDuration, true));
+
 
             npcC.EndMove();
         }
 
-        private Vector3 KeepCurrentY(GameObject npc, Vector3 dstPos)
+        private IEnumerator OnWayMovementNpcX(GameObject npc,
+            Vector3 startPos, Vector3 dstPos,
+            float sign, float startMove,
+            float endMove, float moveTime,
+            float moveDuration, bool oppositeProgress)
         {
+            float curTime = 0;
+            GameEntities.NPCs.NPC npcC = npc.GetComponent<GameEntities.NPCs.NPC>();
+            
+            while (curTime < MovementData.npcMoveTime)
+            {
+                curTime += Time.deltaTime;
+                float oneWayIntensity = curTime / (MovementData.npcMoveTime * 2);
+                float signedIntensity = curTime / MovementData.npcMoveTime;
+                if (oppositeProgress)
+                    signedIntensity = 1f - signedIntensity;
+                if (oppositeProgress)
+                    oneWayIntensity += 0.5f;
+                npcC.Rotate(signedIntensity * sign, oneWayIntensity);
+                if (curTime >= startMove * MovementData.npcMoveTime && curTime <= endMove * MovementData.npcMoveTime)
+                {
+                    moveTime += Time.deltaTime;
+                    dstPos.y = npc.transform.position.y;
+                    npc.transform.position = Vector3.Lerp(startPos, dstPos, moveTime / moveDuration);
+                }
+                yield return new WaitForEndOfFrame();
+            }
             dstPos.y = npc.transform.position.y;
-            return dstPos;
-        }
-
-        private Stack<GameObject> GetNPCContainer()
-        {
-            float ratio1 = PooledGameData.NPCs[0].Count > 0 ? Init.GlobalVariables.GameConfig.Npc1Ratio : 0;
-            float ratio2 = PooledGameData.NPCs[1].Count > 0 ? Init.GlobalVariables.GameConfig.Npc2Ratio : 0;
-            float ratio3 = PooledGameData.NPCs[2].Count > 0 ? Init.GlobalVariables.GameConfig.Npc3Ratio : 0;
-
-            int index = Utils.CommonUtils.GetRandomWeightedIndex(ratio1, ratio2, ratio3);
-            if (index == -1)
-                return null;
-            return PooledGameData.NPCs[index];
+            npc.transform.position = dstPos;
         }
 
         public void TakeTeleport(GameObject src, GameObject teleport)
