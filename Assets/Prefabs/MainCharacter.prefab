@@ -47,8 +47,8 @@ BoxCollider:
   m_IsTrigger: 1
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 1.9999999, y: 0.6936715, z: 1.9165943}
-  m_Center: {x: 0, y: -0.12074846, z: -0.32959008}
+  m_Size: {x: 1.9999999, y: 0.6936715, z: 1.36}
+  m_Center: {x: 0, y: -0.12074846, z: -0.05}
 --- !u!114 &8648238100267941314
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76,9 +76,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   CurrentScore:
-    OnChange:
-      m_PersistentCalls:
-        m_Calls: []
+    TimeElapsed: 0
+    _currentScore: 0
+    _currentLife: 0
+    _currentWave: 0
+    Rank: 0
   _config: {fileID: 11400000, guid: 3d75c240882fb44158c4c78e9297d2e1, type: 2}
 --- !u!54 &8084021631550560512
 Rigidbody:
