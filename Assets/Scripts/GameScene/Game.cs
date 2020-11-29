@@ -248,7 +248,7 @@ namespace rqgames.Game
             for (int i = 0; i < curRow.Count; i++)
             {
                 GameObject npc = curRow[i];
-                StartCoroutine(MovementNpcX(wave, npc, npc.transform.position
+                npc.GetComponent<GameEntities.NPCs.NPC>().StartCoroutine(MovementNpcX(wave, npc, npc.transform.position
                     + Vector3.right * sign * MovementData.xOffsetNPC
                     , i, sign));
             }
@@ -257,7 +257,7 @@ namespace rqgames.Game
         private IEnumerator MovementNpcX(Wave wave, GameObject npc, Vector3 dstPos, int listIndex, float sign)
         {
             yield return new WaitForSeconds(MovementData.npcMoveTime * listIndex * MovementData.waitBeforeMoveNextNpc);
-
+            
             Vector3 startPos = npc.transform.position;
             GameEntities.NPCs.NPC npcC = npc.GetComponent<GameEntities.NPCs.NPC>();
             npcC.StartMove();
@@ -266,8 +266,8 @@ namespace rqgames.Game
             float endMove = 0.4f; // percent value
             float moveDuration = (1f - startMove) * MovementData.npcMoveTime + endMove * MovementData.npcMoveTime;
 
-            yield return StartCoroutine(OnWayMovementNpcX(npc, startPos, dstPos, sign, startMove, 1, 0, moveDuration, false));
-            yield return StartCoroutine(OnWayMovementNpcX(npc, startPos, dstPos, sign, -1, endMove,
+            yield return npcC.StartCoroutine(OnWayMovementNpcX(npc, startPos, dstPos, sign, startMove, 1, 0, moveDuration, false));
+            yield return npcC.StartCoroutine(OnWayMovementNpcX(npc, startPos, dstPos, sign, -1, endMove,
                 (1f - startMove) * MovementData.npcMoveTime, moveDuration, true));
 
 
